@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import math
 
 
@@ -5,7 +6,6 @@ class MyOneHotEncoder:
     def __init__(self):
         self.vector_dict = dict()
 
-    # J : 연령, K : 성별, O : 주증상, AN : 의식, AO : 수축혈압, AP : 이완혈압, AQ : 맥박수, AR : 호흡수, AS : 체온
     def encoding(self, myData):
         def __inspect_column__(value_list):
             type_dict = dict()
@@ -89,11 +89,12 @@ class MyOneHotEncoder:
         # for k in sorted(k_dict.keys()):
         #     print(k, k_dict[k])
 
+        # initial information & Past history 만을 이용하여 학습
         scalar_columns = ['D', 'E', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'Q', 'S', 'T', 'U', 'V', 'W', 'X',
                           'Y', 'Z', 'AA', 'AB', 'AC']
         scalar_columns_start = ['J', 'H']
         scalar_columns_end = ['K']
-        scalar_columns_start_end = ['K']
+        scalar_columns_start_nd = ['K']
 
         class_columns = ['P', 'R', 'AD']
 
