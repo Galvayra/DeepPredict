@@ -36,15 +36,14 @@ class DataHandler:
 
         return key
 
+    def set_header_list(self, start, end):
+        return [self.__get_head_dict_key__(where) for where in range(start, end + 1)]
+
     def __set_data_dict__(self):
         data_dict = dict()
 
-        # D ~ CP (3 ~ 93)
-        column_where_d = 3
-        column_where_cp = 93
-
-        # ["D", ... ,"CP"]
-        header_list = [self.__get_head_dict_key__(where) for where in range(column_where_d, column_where_cp + 1)]
+        # ["D", ... ,"CP"], D=3, CP=93
+        header_list = self.set_header_list(start=3, end=93)
 
         for header in header_list:
             header_key = self.head_dict[header]

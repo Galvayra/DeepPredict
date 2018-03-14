@@ -172,10 +172,11 @@ def closed_validation(myData):
     y_test = myData.y_data
 
 
-    # # init MyOneHotEncoder
-    # myOneHotEncoder = MyOneHotEncoder()
-    # myOneHotEncoder.encoding(myData.data_dict)
-    #
+    # init MyOneHotEncoder
+    myOneHotEncoder = MyOneHotEncoder()
+    myOneHotEncoder.encoding(myData)
+
+
     # # get x_data from dictionary(data set), and set data count
     # x_train = myOneHotEncoder.fit(myData.data_dict, len(y_train))
     # x_test = myOneHotEncoder.fit(myData.data_dict, len(y_test))

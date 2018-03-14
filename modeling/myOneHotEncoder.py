@@ -4,67 +4,72 @@ class MyOneHotEncoder:
         self.vector_dict = dict()
 
     # J : 연령, K : 성별, O : 주증상, AN : 의식, AO : 수축혈압, AP : 이완혈압, AQ : 맥박수, AR : 호흡수, AS : 체온
-    def encoding(self, data_dict):
-        def _set_scalar_dict():
-            scalar_dict = dict()
-            scalar_list = sorted(list(set(vector_list)))
+    def encoding(self, myData):
+        # def _set_scalar_dict():
+        #     scalar_dict = dict()
+        #     scalar_list = sorted(list(set(vector_list)))
+        #
+        #     # 연령이 아닌 경우는 -1, 0 두개의 값이 오류이므로 제외
+        #     if k is not "J":
+        #         scalar_list = scalar_list[2:]
+        #
+        #     # 마지막 값은 오류이므로 제외
+        #     scalar_list.pop()
+        #
+        #     scalar_dict["min"] = scalar_list[0]
+        #     scalar_dict["max"] = scalar_list[-1]
+        #     scalar_dict["div"] = float(scalar_dict["max"] - scalar_dict["min"])
+        #
+        #     return scalar_dict
+        #
+        # def _set_class_dict():
+        #     class_dict = dict()
+        #
+        #     for v in vector_list:
+        #         if v not in class_dict:
+        #             class_dict[v] = 0
+        #
+        #         class_dict[v] += 1
+        #
+        #     return class_dict
+        #
+        # def _set_symptom_dict():
+        #     symptom_dict = dict()
+        #
+        #     for line in vector_list:
+        #         line = line.strip()
+        #         if line.endswith(";"):
+        #             line = line[:-1]
+        #
+        #         for symptom in line.split(";"):
+        #             symptom = symptom.strip()
+        #
+        #             if symptom not in symptom_dict:
+        #                 symptom_dict[symptom] = 0
+        #
+        #             symptom_dict[symptom] += 1
+        #
+        #     return symptom_dict
 
-            # 연령이 아닌 경우는 -1, 0 두개의 값이 오류이므로 제외
-            if k is not "J":
-                scalar_list = scalar_list[2:]
 
-            # 마지막 값은 오류이므로 제외
-            scalar_list.pop()
+        pass
 
-            scalar_dict["min"] = scalar_list[0]
-            scalar_dict["max"] = scalar_list[-1]
-            scalar_dict["div"] = float(scalar_dict["max"] - scalar_dict["min"])
-
-            return scalar_dict
-
-        def _set_class_dict():
-            class_dict = dict()
-
-            for v in vector_list:
-                if v not in class_dict:
-                    class_dict[v] = 0
-
-                class_dict[v] += 1
-
-            return class_dict
-
-        def _set_symptom_dict():
-            symptom_dict = dict()
-
-            for line in vector_list:
-                line = line.strip()
-                if line.endswith(";"):
-                    line = line[:-1]
-
-                for symptom in line.split(";"):
-                    symptom = symptom.strip()
-
-                    if symptom not in symptom_dict:
-                        symptom_dict[symptom] = 0
-
-                    symptom_dict[symptom] += 1
-
-            return symptom_dict
-
-        for k, vector_list in data_dict.items():
-
-            # key : 성별
-            if k == "K":
-                self.vector_dict[k] = _set_class_dict()
-            # key : 주증상
-            elif k == "O":
-                self.vector_dict[k] = _set_symptom_dict()
-            # key : 의식
-            elif k == "AN":
-                self.vector_dict[k] = _set_class_dict()
-            # scalar vector
-            else:
-                self.vector_dict[k] = _set_scalar_dict()
+        #
+        # for k in keys:
+        #     print(k)
+        #
+        #     # # key : 성별
+        #     # if k == "K":
+        #     #     self.vector_dict[k] = _set_class_dict()
+        #     # # key : 주증상
+        #     # elif k == "O":
+        #     #     self.vector_dict[k] = _set_symptom_dict()
+        #     # # key : 의식
+        #     # elif k == "AN":
+        #     #     self.vector_dict[k] = _set_class_dict()
+        #     # # scalar vector
+        #     # else:
+        #     #     self.vector_dict[k] = _set_scalar_dict()
 
     def fit(self, data_dict, data_count):
         def _init_x_data():
