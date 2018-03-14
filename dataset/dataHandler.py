@@ -34,7 +34,8 @@ class DataHandler:
         self.erase_index_list = self.set_erase_index_list()
         self.data_dict = self.set_data_dict()
 
-    # J : 연령, K : 성별, O : 주증상, AO : 수축혈압, AN : 의식, AP : 이완혈압, AQ : 맥박수, AR : 호흡수, AS : 체온
+    # refer to reference file
+
     def set_data_dict(self):
         data_dict = dict()
 
