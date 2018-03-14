@@ -27,6 +27,7 @@ class MyOneHotEncoder:
 
             return type_dict
 
+        # scalar dict를 생성하기 위해서는 앞 뒤 예외처리를 해야하는지 각 column 마다 확인해주어야 한다
         def __set_scalar_dict__(value_list, except_start=0, except_end=0):
             scalar_dict = dict()
             scalar_list = list()
@@ -49,6 +50,7 @@ class MyOneHotEncoder:
 
             return scalar_dict
 
+        # 셀의 공백은 type is not str 으로 찾을 수 있으며, 공백을 하나의 차원으로 볼지에 대한 선택을 우선 해야한다
         def __set_class_dict__(vector_list):
             class_dict = dict()
 
@@ -90,11 +92,12 @@ class MyOneHotEncoder:
         #     print(k, k_dict[k])
 
         # initial information & Past history 만을 이용하여 학습
+
         scalar_columns = ['D', 'E', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'Q', 'S', 'T', 'U', 'V', 'W', 'X',
                           'Y', 'Z', 'AA', 'AB', 'AC']
         scalar_columns_start = ['J', 'H']
         scalar_columns_end = ['K']
-        scalar_columns_start_nd = ['K']
+        scalar_columns_start_end = ['K']
 
         class_columns = ['P', 'R', 'AD']
 
