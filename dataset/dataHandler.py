@@ -51,6 +51,12 @@ class DataHandler:
 
             for i, data in enumerate(self.rows_data[header_key]):
                 if i not in self.erase_index_list:
+
+                    if type(data) is int:
+                        data = float(data)
+                    if type(data) is str:
+                        data = data.strip()
+
                     data_dict[header].append(data)
 
         return data_dict
