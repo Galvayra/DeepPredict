@@ -177,32 +177,32 @@ def closed_validation(myData):
     myOneHotEncoder.encoding(myData.data_dict)
 
 
-    # # get x_data from dictionary(data set), and set data count
-    # x_train = myOneHotEncoder.fit(myData.data_dict, len(y_train))
-    # x_test = myOneHotEncoder.fit(myData.data_dict, len(y_test))
+    # get x_data from dictionary(data set), and set data count
+    x_train = myOneHotEncoder.fit(myData.data_dict, len(y_train))
+    x_test = myOneHotEncoder.fit(myData.data_dict, len(y_test))
 
-    # show_shape(myData, x_train, x_test, y_train, y_test)
-    #
-    # #####Logistic Regression
-    #
-    # score = logistic_regression(x_train, y_train, x_test, y_test)
-    # logit_fpr, logit_tpr, _ = roc_curve(y_test, score)
-    # roc_auc = auc(logit_fpr, logit_tpr)
-    # logistic_plot.plot(logit_fpr, logit_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % roc_auc)
-    #
-    # ######Logistic Regression end
-    #
-    # #####SVM
-    #
-    # accuracy, score, probas_, y_test_np = predict_svm(x_train, y_train, x_test, y_test)
-    # svm_fpr, svm_tpr, _ = roc_curve(y_test_np, probas_[:, 1])
-    # roc_auc = auc(svm_fpr, svm_tpr)
-    #
-    # svm_plot.plot(svm_fpr, svm_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % roc_auc)
-    #
-    # #####SVM end
-    #
-    # show_plt(accuracy, score, logistic_plot, svm_plot)
+    show_shape(myData, x_train, x_test, y_train, y_test)
+
+    #####Logistic Regression
+
+    score = logistic_regression(x_train, y_train, x_test, y_test)
+    logit_fpr, logit_tpr, _ = roc_curve(y_test, score)
+    roc_auc = auc(logit_fpr, logit_tpr)
+    logistic_plot.plot(logit_fpr, logit_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % roc_auc)
+
+    ####Logistic Regression end
+
+    #####SVM
+
+    accuracy, score, probas_, y_test_np = predict_svm(x_train, y_train, x_test, y_test)
+    svm_fpr, svm_tpr, _ = roc_curve(y_test_np, probas_[:, 1])
+    roc_auc = auc(svm_fpr, svm_tpr)
+
+    svm_plot.plot(svm_fpr, svm_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % roc_auc)
+
+    #####SVM end
+
+    show_plt(accuracy, score, logistic_plot, svm_plot)
 
 
 def show_plt(accuracy, score, logistic_plot, svm_plot):

@@ -15,7 +15,8 @@ def logistic_regression(x_train, y_train, x_test, y_test):
     X = tf.placeholder(dtype=tf.float32, shape=[None, dimension])
     Y = tf.placeholder(dtype=tf.float32, shape=[None, 1])
 
-    W = tf.Variable(tf.random_normal([dimension, 1]), name="weight")
+    # W = tf.Variable(tf.random_normal([dimension, 1]), name="weight")
+    W = tf.get_variable("weight", dtype=tf.float32, shape=[dimension, 1], initializer=tf.contrib.layers.xavier_initializer())
     b = tf.Variable(tf.random_normal([1]), name="bias")
     hypothesis = tf.sigmoid(tf.matmul(X, W) + b)
 

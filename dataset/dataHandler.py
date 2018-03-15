@@ -63,7 +63,6 @@ class DataHandler:
 
     def __set_erase_index_list__(self):
 
-        # G : 수축혈압, H : 이완혈압, I : 맥박수, J : 호흡수
         # header keys 조건이 모두 만족 할 때
         def __condition_all__(header_list, condition):
             header_keys = [self.head_dict[i] for i in header_list]
@@ -85,6 +84,7 @@ class DataHandler:
 
         erase_index_list = list()
 
+        # G : 수축혈압, H : 이완혈압, I : 맥박수, J : 호흡수 == 0 제외
         erase_index_dict, num_match = __condition_all__(header_list=["G", "H", "I", "J"], condition=0)
         __append__(erase_index_dict, num_match)
 
@@ -113,10 +113,10 @@ class DataHandler:
         del self.head_dict
         del self.erase_index_list
 
-    # def counting_mortality(self, data):
-    #     count = 0
-    #     for i in data:
-    #         if i == [1]:
-    #             count += 1
-    #
-    #     return count
+    def counting_mortality(self, data):
+        count = 0
+        for i in data:
+            if i == [1]:
+                count += 1
+
+        return count
