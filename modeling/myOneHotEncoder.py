@@ -1,12 +1,22 @@
 # -*- coding: utf-8 -*-
 import math
 
+# initial information & Past history 만을 이용하여 학습
+
+scalar_columns = ['D', 'E', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'Q', 'S', 'T', 'U', 'V', 'W', 'X',
+                  'Y', 'Z', 'AA', 'AB', 'AC']
+scalar_columns_start = ['J', 'H']
+scalar_columns_end = ['K']
+scalar_columns_start_end = ['K']
+
+class_columns = ['P', 'R', 'AD']
+
 
 class MyOneHotEncoder:
     def __init__(self):
         self.vector_dict = dict()
 
-    def encoding(self, myData):
+    def encoding(self, data_dict):
         def __inspect_column__(value_list):
             type_dict = dict()
             for i, value in enumerate(value_list):
@@ -91,28 +101,17 @@ class MyOneHotEncoder:
         # for k in sorted(k_dict.keys()):
         #     print(k, k_dict[k])
 
-        # initial information & Past history 만을 이용하여 학습
-
-        scalar_columns = ['D', 'E', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'Q', 'S', 'T', 'U', 'V', 'W', 'X',
-                          'Y', 'Z', 'AA', 'AB', 'AC']
-        scalar_columns_start = ['J', 'H']
-        scalar_columns_end = ['K']
-        scalar_columns_start_end = ['K']
-
-        class_columns = ['P', 'R', 'AD']
-
-        for k in sorted(myData.data_dict.keys()):
-
+        for k in sorted(data_dict.keys()):
             if k in scalar_columns:
-                self.vector_dict[k] = __set_scalar_dict__(myData.data_dict[k], except_start=0, except_end=0)
+                self.vector_dict[k] = __set_scalar_dict__(data_dict[k], except_start=0, except_end=0)
             elif k in scalar_columns_start:
-                self.vector_dict[k] = __set_scalar_dict__(myData.data_dict[k], except_start=1, except_end=0)
+                self.vector_dict[k] = __set_scalar_dict__(data_dict[k], except_start=1, except_end=0)
             elif k in scalar_columns_end:
-                self.vector_dict[k] = __set_scalar_dict__(myData.data_dict[k], except_start=0, except_end=1)
+                self.vector_dict[k] = __set_scalar_dict__(data_dict[k], except_start=0, except_end=1)
             elif k in scalar_columns_start_end:
-                self.vector_dict[k] = __set_scalar_dict__(myData.data_dict[k], except_start=0, except_end=0)
+                self.vector_dict[k] = __set_scalar_dict__(data_dict[k], except_start=0, except_end=0)
             elif k in class_columns:
-                self.vector_dict[k] = __set_class_dict__(myData.data_dict[k])
+                self.vector_dict[k] = __set_class_dict__(data_dict[k])
 
     def fit(self, data_dict, data_count):
         def _init_x_data():
