@@ -12,6 +12,7 @@ scalar_columns = {
     }
 
 class_columns = ['P', 'R', 'AD']
+MIN_SCALING = 0.1
 
 
 class MyOneHotEncoder:
@@ -45,6 +46,7 @@ class MyOneHotEncoder:
             scalar_list = list()
 
             for i in sorted(list(set(value_list))):
+                # 공백은 사전에 넣지 않음
                 if not math.isnan(i):
                     scalar_list.append(i)
 
@@ -132,12 +134,26 @@ class MyOneHotEncoder:
 
             return _x_data
 
-        # def __make_vector_from_class__():
-        #     for c in class_list:
-        #         if c == value:
-        #             x_data[i].append(1.0)
-        #         else:
-        #             x_data[i].append(0.0)
+        def __make_vector_use_scalar__():
+            for _i, _value in enumerate(v):
+                if math.isnan(_value):
+                    _value = float(0)
+                elif _value < minimum:
+                    _value = float(MIN_SCALING)
+                elif _value > maximum:
+                    _value = float(1)
+                # normalization
+                else:
+                    _value = (_value - minimum + MIN_SCALING)/(division + MIN_SCALING)
+
+                x_data[_i].append(_value)
+
+        def __make_vector_use_class__():
+            for c in class_list:
+                if c == value:
+                    x_data[i].append(1.0)
+                else:
+                    x_data[i].append(0.0)
 
         def __get_all_columns__(columns_dict):
             _columns = list()
@@ -150,64 +166,18 @@ class MyOneHotEncoder:
 
         for k, v in data_dict.items():
 
-            # # key : 성별
-            # if k == "K":
-            #     class_list = encode_dict.keys()
-            #     for i, value in enumerate(v):
-            #         __make_vector_from_class__()
-            # # elif k in __get_all_columns__(scalar_columns):
+            # key : 성별
+            if k in class_columns:
+                encode_dict = self.vector_dict[k]
+                class_list = encode_dict.keys()
+                for i, value in enumerate(v):
+                    __make_vector_use_class__()
+            # elif k in __get_all_columns__(scalar_columns):
             if k in __get_all_columns__(scalar_columns):
                 encode_dict = self.vector_dict[k]
                 minimum = encode_dict["min"]
                 maximum = encode_dict["max"]
                 division = encode_dict["div"]
-
-                for i, value in enumerate(v):
-                    if math.isnan(value):
-                        value = float(-1)
-                    elif value < minimum or value > maximum:
-                        value = float(-1)
-                    # normalization
-                    else:
-                        value = (value - minimum)/division
-
-                    x_data[i].append(value)
+                __make_vector_use_scalar__()
 
         return x_data
-
-        # for k, v in data_dict.items():
-        #     encode_dict = self.vector_dict[k]
-        #
-        #     # key : 성별
-        #     if k == "K":
-        #         class_list = encode_dict.keys()
-        #         for i, value in enumerate(v):
-        #             __make_vector_from_class__()
-        #     # # key : 주증상
-        #     # elif k == "O":
-        #     #     # pass
-        #     #     class_list = encode_dict.keys()
-        #     #     for i, value in enumerate(v):
-        #     #         __make_vector_from_class__()
-        #     # # key : 의식
-        #     # elif k == "AN":
-        #     #     class_list = encode_dict.keys()
-        #     #     for i, value in enumerate(v):
-        #     #         __make_vector_from_class__()
-        #     # scalar vector
-        #     elif k in scalar_columns:
-        #         minimum = encode_dict["min"]
-        #         maximum = encode_dict["max"]
-        #         division = encode_dict["div"]
-        #
-        #         for i, value in enumerate(v):
-        #             # exception
-        #             if value < minimum or value > maximum:
-        #                 value = float(-1)
-        #             # normalization
-        #             else:
-        #                 value = (value - minimum)/division
-        #
-        #             x_data[i].append(value)
-        #
-        # return x_data

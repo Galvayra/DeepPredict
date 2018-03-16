@@ -179,6 +179,9 @@ def closed_validation(myData):
 
     # get x_data from dictionary(data set), and set data count
     x_train = myOneHotEncoder.fit(myData.data_dict, len(y_train))
+
+    # for i in x_train:
+    #     print(i)
     x_test = myOneHotEncoder.fit(myData.data_dict, len(y_test))
 
     show_shape(myData, x_train, x_test, y_train, y_test)

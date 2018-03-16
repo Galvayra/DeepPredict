@@ -16,9 +16,18 @@ def logistic_regression(x_train, y_train, x_test, y_test):
     Y = tf.placeholder(dtype=tf.float32, shape=[None, 1])
 
     # W = tf.Variable(tf.random_normal([dimension, 1]), name="weight")
-    W = tf.get_variable("weight", dtype=tf.float32, shape=[dimension, 1], initializer=tf.contrib.layers.xavier_initializer())
-    b = tf.Variable(tf.random_normal([1]), name="bias")
-    hypothesis = tf.sigmoid(tf.matmul(X, W) + b)
+    W = tf.get_variable("weight", dtype=tf.float32, shape=[dimension, dimension], initializer=tf.contrib.layers.xavier_initializer())
+    b = tf.Variable(tf.random_normal([dimension]), name="bias")
+    L = tf.nn.relu(tf.matmul(X, W) + b)
+
+    W2 = tf.get_variable("weight2", dtype=tf.float32, shape=[dimension, dimension], initializer=tf.contrib.layers.xavier_initializer())
+    b2 = tf.Variable(tf.random_normal([dimension]), name="bias2")
+    L2 = tf.nn.relu(tf.matmul(L, W2) + b2)
+
+    W3 = tf.get_variable("weight3", dtype=tf.float32, shape=[dimension, 1], initializer=tf.contrib.layers.xavier_initializer())
+    b3 = tf.Variable(tf.random_normal([1]), name="bias3")
+
+    hypothesis = tf.sigmoid(tf.matmul(L2, W3) + b3)
 
     with tf.name_scope("cost") as scope:
         cost = -tf.reduce_mean(Y * tf.log(hypothesis) + (1-Y) * tf.log(1-hypothesis))
