@@ -66,7 +66,12 @@ class MyVector:
         del self.my_data
 
     def dump(self):
-        with open(DUMP_PATH + DUMP_FILE, 'w') as outfile:
+        if IS_CLOSED:
+            file_name = DUMP_PATH + DUMP_FILE + "_closed"
+        else:
+            file_name = DUMP_PATH + DUMP_FILE + "_opened_" + str(NUM_FOLDS)
+
+        with open(file_name, 'w') as outfile:
             json.dump(self.vector_list, outfile, indent=4)
-            print("success make dump file! - file name is", DUMP_PATH + DUMP_FILE)
+            print("success make dump file! - file name is", file_name)
 
