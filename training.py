@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import time
-import pickle
-from DeepPredict.variables import DIR_NAME, FILE_NAME
 
 start_time = time.time()
 
