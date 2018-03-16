@@ -4,7 +4,19 @@ import numpy as np
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import average_precision_score
 from sklearn.metrics import precision_recall_curve
-from variables import EPOCH, NUM_FOLDS, IS_CLOSED
+from DeepPredict.learning.variables import EPOCH
+
+
+class MyTrain:
+    def __init__(self, vector_list):
+        self.vector_list = vector_list
+        self.epoch = EPOCH
+
+    def set_epoch(self, epoch):
+        self.epoch = epoch
+
+    def training(self):
+        pass
 
 
 def logistic_regression(x_train, y_train, x_test, y_test):
