@@ -1,4 +1,7 @@
 
+DIR_NAME = "Pickle/"
+FILE_NAME = "data.p"
+
 NUM_FOLDS = 1
 EPOCH = 2000
 RATIO = 10
@@ -18,6 +21,3 @@ def show_options():
 
     print(option)
     print("EPOCH -", EPOCH, "\n\n")
-
-
-show_options()
