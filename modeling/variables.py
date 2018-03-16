@@ -10,3 +10,6 @@ scalar_columns = {
 class_columns = ['P', 'R', 'AD']
 MIN_SCALING = 0.1
 
+
+NUM_FOLDS = 5
+IS_CLOSED = False
