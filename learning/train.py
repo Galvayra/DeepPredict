@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.metrics import roc_curve, auc
-from DeepPredict.learning.variables import EPOCH, NUM_HIDDEN_LAYER
+from DeepPredict.learning.variables import *
 
 
 class MyTrain:
@@ -54,35 +54,40 @@ class MyTrain:
             return probas_, _accuracy, _precision, _recall
 
         def __logistic_regression__():
-            dimension = len(x_train[0])
+            num_input_node = len(x_train[0])
 
-            tf_x = tf.placeholder(dtype=tf.float32, shape=[None, dimension])
+            if NUM_HIDDEN_DIMENSION:
+                num_hidden_node = NUM_HIDDEN_DIMENSION
+            else:
+                num_hidden_node = len(x_train[0])
+
+            tf_x = tf.placeholder(dtype=tf.float32, shape=[None, num_input_node])
             tf_y = tf.placeholder(dtype=tf.float32, shape=[None, 1])
 
             tf_weight = list()
             tf_bias = list()
-            tf_layer = list()
-
-            print("\nHidden layer count is", NUM_HIDDEN_LAYER)
-            print()
+            tf_layer = [tf_x]
 
             if NUM_HIDDEN_LAYER:
-                tf_weight.append(tf.get_variable("i_weight", dtype=tf.float32, shape=[dimension, dimension],
-                                                 initializer=tf.contrib.layers.xavier_initializer()))
-                tf_bias.append(tf.Variable(tf.random_normal([dimension]), name="bias"))
-                tf_layer.append(tf.nn.relu(tf.matmul(tf_x, tf_weight[0]) + tf_bias[0]))
-            else:
-                tf_layer.append(tf_x)
+                print("\nnum of  hidden layers  is", NUM_HIDDEN_LAYER)
+                print("num of nodes in hidden is", num_hidden_node, "\n\n")z
 
             for i in range(NUM_HIDDEN_LAYER):
-                tf_weight.append(tf.get_variable("h_weight_" + str(i+1), dtype=tf.float32, shape=[dimension, dimension],
-                                                 initializer=tf.contrib.layers.xavier_initializer()))
-                tf_bias.append(tf.Variable(tf.random_normal([dimension]), name="h_bias_" + str(i+1)))
-                tf_layer.append(tf.nn.relu(tf.matmul(tf_layer[i], tf_weight[i+1]) + tf_bias[i+1]))
+                if i == 0:
+                    tf_weight.append(tf.get_variable("h_weight_" + str(i+1), dtype=tf.float32,
+                                                     shape=[num_input_node, num_hidden_node],
+                                                     initializer=tf.contrib.layers.xavier_initializer()))
+                else:
+                    tf_weight.append(tf.get_variable("h_weight_" + str(i+1), dtype=tf.float32,
+                                                     shape=[num_hidden_node, num_hidden_node],
+                                                     initializer=tf.contrib.layers.xavier_initializer()))
+                tf_bias.append(tf.Variable(tf.random_normal([num_hidden_node]), name="h_bias_" + str(i+1)))
+                tf_layer.append(tf.nn.relu(tf.matmul(tf_layer[i], tf_weight[i]) + tf_bias[i]))
 
-            tf_weight.append(tf.get_variable("o_weight", dtype=tf.float32, shape=[dimension, 1],
+            tf_weight.append(tf.get_variable("o_weight", dtype=tf.float32, shape=[num_hidden_node, 1],
                                              initializer=tf.contrib.layers.xavier_initializer()))
             tf_bias.append(tf.Variable(tf.random_normal([1]), name="o_bias"))
+
             hypothesis = tf.sigmoid(tf.matmul(tf_layer[-1], tf_weight[-1]) + tf_bias[-1])
 
             with tf.name_scope("cost"):
