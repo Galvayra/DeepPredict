@@ -5,6 +5,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.metrics import roc_curve, auc
 from DeepPredict.learning.variables import *
+import time
 
 
 class MyTrain:
@@ -68,9 +69,10 @@ class MyTrain:
             tf_bias = list()
             tf_layer = [tf_x]
 
+            print("\nepoch -", EPOCH)
             if NUM_HIDDEN_LAYER:
-                print("\nnum of  hidden layers  is", NUM_HIDDEN_LAYER)
-                print("num of nodes in hidden is", num_hidden_node, "\n\n")
+                print("num of  hidden layers  -", NUM_HIDDEN_LAYER)
+                print("num of nodes in hidden -", num_hidden_node, "\n\n")
 
             for i in range(NUM_HIDDEN_LAYER):
                 if i == 0:
@@ -98,8 +100,8 @@ class MyTrain:
 
             # cut off
             predict = tf.cast(hypothesis > 0.5, dtype=tf.float32)
-            accuracy = tf.reduce_mean(tf.cast(tf.equal(predict, tf_y), dtype=tf.float32))
-            accuracy_summ = tf.summary.scalar("accuracy", accuracy)
+            _accuracy = tf.reduce_mean(tf.cast(tf.equal(predict, tf_y), dtype=tf.float32))
+            accuracy_summ = tf.summary.scalar("accuracy", _accuracy)
 
             with tf.Session() as sess:
                 merged_summary = tf.summary.merge_all()
@@ -111,13 +113,14 @@ class MyTrain:
 
                 # if self.is_closed:
                 for step in range(EPOCH + 1):
-                    summary, cost_val, _ = sess.run([merged_summary, cost, train], feed_dict={tf_x: x_train, tf_y: y_train})
+                    summary, cost_val, _ = sess.run([merged_summary, cost, train],
+                                                    feed_dict={tf_x: x_train, tf_y: y_train})
                     writer.add_summary(summary, global_step=step)
 
                     if step % (EPOCH / 10) == 0:
                         print(str(step).rjust(5), cost_val)
 
-                h, p, a = sess.run([hypothesis, predict, accuracy], feed_dict={tf_x: x_test, tf_y: y_test})
+                h, p, a = sess.run([hypothesis, predict, _accuracy], feed_dict={tf_x: x_test, tf_y: y_test})
 
             tf.reset_default_graph()
 
@@ -154,6 +157,7 @@ class MyTrain:
                 print("Total accuracy-Score -", accuracy[k] / self.num_fold)
                 print()
 
+        start_time = time.time()
         accuracy = {"logistic_regression": 0, "svm": 0}
         precision = {"logistic_regression": 0, "svm": 0}
         recall = {"logistic_regression": 0, "svm": 0}
@@ -194,6 +198,8 @@ class MyTrain:
                 svm_fpr, svm_tpr, _ = roc_curve(y_test_np, svm_probas_[:, 1])
                 roc_auc = auc(svm_fpr, svm_tpr)
                 svm_plot.plot(svm_fpr, svm_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % roc_auc)
+
+        print("processing time     --- %s seconds ---" % (time.time() - start_time))
 
         if do_show:
             __show_plt__()

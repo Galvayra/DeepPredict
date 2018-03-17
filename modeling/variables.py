@@ -12,7 +12,6 @@ MIN_SCALING = 0.1
 DUMP_PATH = "modeling/"
 DUMP_FILE = "vectors"
 
-NUM_FOLDS = 5
-IS_CLOSED = True
-
-
+NUM_FOLDS = 1
+IS_CLOSED = False
+RATIO = 10

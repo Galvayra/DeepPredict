@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-from DeepPredict.modeling.variables import DUMP_PATH, DUMP_FILE, IS_CLOSED, NUM_FOLDS
+from DeepPredict.modeling.variables import DUMP_PATH, DUMP_FILE, IS_CLOSED, NUM_FOLDS, RATIO
 from DeepPredict.learning.train import MyTrain
-import time
 import json
-start_time = time.time()
 
 
 if __name__ == '__main__':
@@ -23,9 +21,9 @@ if __name__ == '__main__':
         else:
             print("\n\n========== OPENED DATA SET ==========\n")
             print("k fold -", NUM_FOLDS)
+            if NUM_FOLDS == 1:
+                print("test ratio -", str(RATIO)+"%")
+            print()
 
         train = MyTrain(vector_list, IS_CLOSED)
         train.training()
-
-        end_time = time.time()
-        print("processing time     --- %s seconds ---" % (time.time() - start_time))
