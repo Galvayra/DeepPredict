@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.metrics import roc_curve, auc
-from DeepPredict.learning.variables import *
+from DeepPredict.learning.options import *
 import time
 
 
@@ -46,11 +46,10 @@ class MyTrain:
             _recall = recall_score(y_test, y_pred)
             _accuracy = accuracy_score(y_test, y_pred)
 
-            print('SVM')
+            print('\n\nSVM')
             print('Precision : %.2f' % (_precision*100))
             print('Recall : %.2f' % (_recall*100))
             print('Accuracy : %.2f' % (_accuracy*100))
-            print()
 
             return probas_, _accuracy, _precision, _recall
 
@@ -127,11 +126,10 @@ class MyTrain:
             _precision = precision_score(y_test, p)
             _recall = recall_score(y_test, p)
 
-            print('logistic regression')
+            print('\n\nlogistic regression')
             print('Precision : %.2f' % (_precision*100))
             print('Recall : %.2f' % (_recall*100))
             print('Accuracy : %.2f' % (a*100))
-            print()
 
             return h, a, _precision, _recall
 

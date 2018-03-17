@@ -6,12 +6,15 @@ scalar_columns = {
     "start_1_end_1": ['K']
     }
 
+# scalar_columns = {
+#     "0": ['L', 'M', 'N', 'O']
+#     # "start_1": ['H', 'J'],
+#     # # "end_1": [''],
+#     # "start_1_end_1": ['K']
+#     }
+
 class_columns = ['P', 'R', 'AD']
-MIN_SCALING = 0.1
+# class_columns = ['AD']
 
 DUMP_PATH = "modeling/"
 DUMP_FILE = "vectors"
-
-NUM_FOLDS = 1
-IS_CLOSED = False
-RATIO = 10

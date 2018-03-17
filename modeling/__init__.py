@@ -1,3 +1,3 @@
 from . import *
 
-__all__ = ['myOneHotEncoder', 'variables', 'vectorization']
+__all__ = ['myOneHotEncoder', 'options', 'variables', 'vectorization']

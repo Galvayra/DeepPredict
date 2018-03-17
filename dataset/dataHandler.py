@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
+import math
 from .variables import *
 
 
 # ### refer to reference file ###
 class DataHandler:
     def __init__(self):
-
-        self.rows_data = pd.read_csv(DATA_PATH + DATA_READ)
+        file_name = DATA_PATH + DATA_FILE
+        self.rows_data = pd.read_csv(file_name)
+        print("Read csv file -", file_name, "\n\n")
+        self.file_name = DATA_FILE
         self.head_dict = {self.__get_head_dict_key__(i): v for i, v in enumerate(self.rows_data)}
         self.erase_index_list = self.__set_erase_index_list__()
         self.data_dict = self.__set_data_dict__()
@@ -76,12 +79,19 @@ class DataHandler:
             return _erase_index_dict, len(header_list)
 
         def __append__(_erase_index_dict, _num_match):
-            for k, v in _erase_index_dict.items():
+            for index, v in _erase_index_dict.items():
                 if v == _num_match:
-                    if k not in erase_index_list:
-                        erase_index_list.append(k)
+                    if index not in erase_index_list:
+                        erase_index_list.append(index)
+
+        def __append_to_small__(header="A"):
+            for index, v in self.rows_data[header].items():
+                if math.isnan(v):
+                    erase_index_list.append(index)
 
         erase_index_list = list()
+
+        __append_to_small__()
 
         # G : 수축혈압, H : 이완혈압, I : 맥박수, J : 호흡수 == 0 제외
         erase_index_dict, num_match = __condition_all__(header_list=["G", "H", "I", "J"], condition=0)

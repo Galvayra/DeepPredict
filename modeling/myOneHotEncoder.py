@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import math
 from .variables import *
+from .options import *
 
 
 # initial information & Past history 만을 이용하여 학습
@@ -112,6 +113,9 @@ class MyOneHotEncoder:
             elif k in class_columns:
                 self.vector_dict[k] = __set_class_dict__(data_dict[k])
 
+            # if k in class_columns:
+            #     self.vector_dict[k] = __set_class_dict__(data_dict[k])
+
     def fit(self, data_dict, data_count):
         def ___init_x_data__():
             _x_data = list()
@@ -154,17 +158,22 @@ class MyOneHotEncoder:
         x_data = ___init_x_data__()
 
         for k, v in data_dict.items():
-            # key : 성별
-            if k in class_columns:
-                encode_dict = self.vector_dict[k]
-                class_list = encode_dict.keys()
-                for i, value in enumerate(v):
-                    __make_vector_use_class__()
-            elif k in __get_all_columns__(scalar_columns):
+            if k in __get_all_columns__(scalar_columns):
                 encode_dict = self.vector_dict[k]
                 minimum = encode_dict["min"]
                 maximum = encode_dict["max"]
                 division = encode_dict["div"]
                 __make_vector_use_scalar__()
+            elif k in class_columns:
+                encode_dict = self.vector_dict[k]
+                class_list = encode_dict.keys()
+                for i, value in enumerate(v):
+                    __make_vector_use_class__()
+
+            # if k in class_columns:
+            #     encode_dict = self.vector_dict[k]
+            #     class_list = encode_dict.keys()
+            #     for i, value in enumerate(v):
+            #         __make_vector_use_class__()
 
         return x_data

@@ -1,5 +1,6 @@
 from .myOneHotEncoder import MyOneHotEncoder
-from .variables import NUM_FOLDS, IS_CLOSED, DUMP_FILE, DUMP_PATH, RATIO
+from .variables import DUMP_FILE, DUMP_PATH
+from .options import IS_CLOSED, NUM_FOLDS, RATIO
 from collections import OrderedDict
 import json
 
@@ -19,6 +20,7 @@ class MyVector:
                 return [vector_dict for i in range(NUM_FOLDS)]
 
         self.my_data = my_data
+        self.file_name = my_data.file_name.split('.')[0]
         self.vector_list = __init_vector_list__()
         self.__set_vector_list__()
         self.__free__()
@@ -88,10 +90,11 @@ class MyVector:
         del self.my_data
 
     def dump(self):
+
         if IS_CLOSED:
-            file_name = DUMP_PATH + DUMP_FILE + "_closed"
+            file_name = DUMP_PATH + DUMP_FILE + '_' + self.file_name + "_closed"
         else:
-            file_name = DUMP_PATH + DUMP_FILE + "_opened_" + str(NUM_FOLDS)
+            file_name = DUMP_PATH + DUMP_FILE + '_' + self.file_name + "_opened_" + str(NUM_FOLDS)
 
         with open(file_name, 'w') as outfile:
             json.dump(self.vector_list, outfile, indent=4)
