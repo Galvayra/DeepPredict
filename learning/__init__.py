@@ -1,3 +1,3 @@
 from . import *
 
-__all__ = ['method.py', 'predict', 'variables']
+__all__ = ['method.py', 'train.py', 'variables']

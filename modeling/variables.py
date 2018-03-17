@@ -14,6 +14,6 @@ DUMP_PATH = "modeling/"
 DUMP_FILE = "vectors"
 
 NUM_FOLDS = 5
-IS_CLOSED = True
+IS_CLOSED = False
 
 

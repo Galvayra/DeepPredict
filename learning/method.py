@@ -1,5 +1,5 @@
 from modeling.myOneHotEncoder import MyOneHotEncoder
-from .predict import logistic_regression, predict_svm
+from .train import logistic_regression, predict_svm
 from sklearn.metrics import roc_curve, auc
 import matplotlib.pyplot as plt
 from variables import NUM_FOLDS, IS_CLOSED, RATIO

@@ -140,9 +140,9 @@ class MyOneHotEncoder:
         def __make_vector_use_class__():
             for c in class_list:
                 if c == value:
-                    x_data[i].append(1.0)
+                    x_data[i].append(float(1))
                 else:
-                    x_data[i].append(0.0)
+                    x_data[i].append(float(0))
 
         def __get_all_columns__(columns_dict):
             _columns = list()

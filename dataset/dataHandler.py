@@ -101,9 +101,9 @@ class DataHandler:
         for i, value in enumerate(self.rows_data[header_key]):
             if i not in self.erase_index_list:
                 if value == "사망":
-                    y_labels.append([1])
+                    y_labels.append([float(1)])
                 else:
-                    y_labels.append([0])
+                    y_labels.append([float(0)])
 
         return y_labels
 

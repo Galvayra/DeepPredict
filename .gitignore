@@ -1,4 +1,5 @@
 dataset/*.csv
 dataset/origin/
+modeling/vectors_*
 reference/
 

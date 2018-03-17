@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from DeepPredict.modeling.variables import DUMP_PATH, DUMP_FILE, IS_CLOSED, NUM_FOLDS
-from DeepPredict.learning.predict import MyTrain
+from DeepPredict.learning.train import MyTrain
 import time
 import json
 start_time = time.time()
@@ -24,7 +24,8 @@ if __name__ == '__main__':
             print("\n\n========== OPENED DATA SET ==========\n")
             print("k fold -", NUM_FOLDS)
 
-        train = MyTrain(vector_list)
+        train = MyTrain(vector_list, IS_CLOSED)
+        train.training()
 
         end_time = time.time()
         print("processing time     --- %s seconds ---" % (time.time() - start_time))
