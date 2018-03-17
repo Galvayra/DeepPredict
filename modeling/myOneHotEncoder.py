@@ -154,15 +154,13 @@ class MyOneHotEncoder:
         x_data = ___init_x_data__()
 
         for k, v in data_dict.items():
-
             # key : 성별
             if k in class_columns:
                 encode_dict = self.vector_dict[k]
                 class_list = encode_dict.keys()
                 for i, value in enumerate(v):
                     __make_vector_use_class__()
-            # elif k in __get_all_columns__(scalar_columns):
-            if k in __get_all_columns__(scalar_columns):
+            elif k in __get_all_columns__(scalar_columns):
                 encode_dict = self.vector_dict[k]
                 minimum = encode_dict["min"]
                 maximum = encode_dict["max"]

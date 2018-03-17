@@ -1,6 +1,5 @@
 
 scalar_columns = {
-    # "0": ['O']
     "0": ['D', 'E', 'G', 'I', 'L', 'M', 'N', 'O', 'Q', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC'],
     "start_1": ['H', 'J'],
     # "end_1": [''],
@@ -14,6 +13,6 @@ DUMP_PATH = "modeling/"
 DUMP_FILE = "vectors"
 
 NUM_FOLDS = 5
-IS_CLOSED = False
+IS_CLOSED = True
 
 
