@@ -70,7 +70,7 @@ class MyTrain:
 
             if NUM_HIDDEN_LAYER:
                 print("\nnum of  hidden layers  is", NUM_HIDDEN_LAYER)
-                print("num of nodes in hidden is", num_hidden_node, "\n\n")z
+                print("num of nodes in hidden is", num_hidden_node, "\n\n")
 
             for i in range(NUM_HIDDEN_LAYER):
                 if i == 0:
