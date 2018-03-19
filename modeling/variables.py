@@ -1,5 +1,10 @@
 from collections import OrderedDict
 
+DUMP_PATH = "modeling/vectors/"
+DUMP_FILE = "vectors"
+
+LOAD_WORD2VEC = "GoogleNews-vectors-negative300.bin"
+
 default_info_columns = {
     "scalar": {
         "0": ['D']
@@ -13,7 +18,8 @@ initial_info_columns = {
         "start_1": ['H', 'J'],
         "start_1#end_1": ['K']
     },
-    "class": ['P', 'R', 'S', 'T']
+    "class": ['P', 'R', 'S', 'T'],
+    "word": ['F']
 }
 
 past_history_columns = {
@@ -46,28 +52,20 @@ culture_columns = {
 }
 
 influenza_columns = {
-    "scalar": {
-        "0": ['CM', 'CN']
-    }
+    "class": ['CM', 'CN']
 }
 
 ct_columns = {
-    "scalar": {
-        "0": ['CO', 'CP']
-    }
+    "class": ['CO', 'CP']
 }
 
 columns_dict = OrderedDict()
-# columns_dict["default"] = default_info_columns
-# # columns_dict["initial"] = initial_info_columns
-# columns_dict["history"] = past_history_columns
-# # columns_dict["b_count"] = blood_count_columns
-# # columns_dict["b_chemistry"] = blood_chemistry_columns
-# # columns_dict["abga"] = abga_columns
+columns_dict["default"] = default_info_columns
+columns_dict["initial"] = initial_info_columns
+columns_dict["history"] = past_history_columns
+columns_dict["b_count"] = blood_count_columns
+columns_dict["b_chemistry"] = blood_chemistry_columns
+columns_dict["abga"] = abga_columns
 columns_dict["culture"] = culture_columns
-# # columns_dict["influenza"] = influenza_columns
-# # columns_dict["ct"] = ct_columns
-
-
-DUMP_PATH = "modeling/"
-DUMP_FILE = "vectors"
+columns_dict["influenza"] = influenza_columns
+columns_dict["ct"] = ct_columns

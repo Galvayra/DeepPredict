@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 import math
+import gensim.models.keyedvectors as word2vec
 from .variables import *
 from .options import *
 
 
 # initial information & Past history 만을 이용하여 학습
 class MyOneHotEncoder:
-    def __init__(self):
+    def __init__(self, w2v=True):
         self.vector_dict = dict()
+        if w2v:
+            self.model = word2vec.KeyedVectors.load_word2vec_format(DUMP_PATH + LOAD_WORD2VEC, binary=True)
+            print("Read w2v file -", DUMP_PATH + LOAD_WORD2VEC)
 
     def encoding(self, data_dict):
         def __inspect_columns__():
@@ -42,25 +46,25 @@ class MyOneHotEncoder:
         def __inspect_float_column__():
             for _k in sorted(data_dict.keys()):
                 if _k in blood_count_columns['scalar']:
-                    for i, v in enumerate(data_dict[_k]):
+                    for _i, v in enumerate(data_dict[_k]):
                         try:
                             v = float(v)
                         except ValueError:
-                            print(_k, v, "(", i, ")")
+                            print(_k, v, "(", _i, ")")
 
         # scalar dictionary 생성을 위해 앞 뒤 예외처리를 해야하는지 각 column 마다 확인해주어야 한다
         def __set_scalar_dict__(value_list, except_start=0, except_end=0):
             scalar_dict = dict()
             scalar_list = list()
 
-            for i in sorted(list(set(value_list))):
+            for _i in sorted(list(set(value_list))):
                 # 공백은 사전에 넣지 않음
-                if not math.isnan(i):
-                    scalar_list.append(i)
+                if not math.isnan(_i):
+                    scalar_list.append(_i)
 
             scalar_list = scalar_list[except_start:]
 
-            for i in range(except_end):
+            for _i in range(except_end):
                 scalar_list.pop()
 
             scalar_dict["min"] = scalar_list[0]
@@ -75,21 +79,15 @@ class MyOneHotEncoder:
 
         # 셀의 공백은 type is not str 으로 찾을 수 있으며, 공백(nan)을 하나의 차원으로 볼지에 대한 선택을 우선 해야한다
         def __set_class_dict__(vector_list):
-            def __is_zero__(string):
-                is_zero = True
-                for ch in string:
-                    if ch != '.':
-                        is_zero = False
-                return is_zero
 
             class_dict = dict()
 
-            for i, v in enumerate(vector_list):
+            for _i, v in enumerate(vector_list):
                 v = str(v).strip()
 
                 # key exception is nan
                 if v != "nan":
-                    if __is_zero__(v):
+                    if self.__is_zero__(v):
                         v = str(0)
 
                     if v not in class_dict:
@@ -99,24 +97,33 @@ class MyOneHotEncoder:
 
             return class_dict
 
+        def __set_symptom_dict__(vector_list):
+            symptom_dict = dict()
 
-        # def _set_symptom_dict():
-        #     symptom_dict = dict()
-        #
-        #     for line in vector_list:
-        #         line = line.strip()
-        #         if line.endswith(";"):
-        #             line = line[:-1]
-        #
-        #         for symptom in line.split(";"):
-        #             symptom = symptom.strip()
-        #
-        #             if symptom not in symptom_dict:
-        #                 symptom_dict[symptom] = 0
-        #
-        #             symptom_dict[symptom] += 1
-        #
-        #     return symptom_dict
+            _input = input("Input(EXIT) -")
+
+            while _input != "EXIT":
+
+                try:
+                    print(self.model.wv.most_similar(positive=[_input]))
+                except KeyError:
+                    print("not in vocab")
+
+                _input = input("Input(EXIT) -")
+            # for line in vector_list:
+            #     line = line.strip()
+            #     if line.endswith(";"):
+            #         line = line[:-1]
+            #
+            #     for symptom in line.split(";"):
+            #         symptom = symptom.strip()
+            #
+            #         if symptom not in symptom_dict:
+            #             symptom_dict[symptom] = 0
+            #
+            #         symptom_dict[symptom] += 1
+
+            return symptom_dict
 
         # __inspect_columns__()
         # __inspect_float_column__()
@@ -155,40 +162,64 @@ class MyOneHotEncoder:
                 if k in columns[columns_key]:
                     self.vector_dict[k] = __set_class_dict__(data_dict[k])
 
+            # elif columns_key == "word":
+            #     if k in columns[columns_key]:
+            #         self.vector_dict[k] = __set_symptom_dict__(data_dict[k])
+
         for k in sorted(data_dict.keys()):
             for columns in columns_dict.values():
                 for columns_key in columns:
                     __set_vector_dict__()
 
     def __set_scalar_value_list__(self, key, value_list):
+
         new_value_list = list()
 
-        for i, value in enumerate(value_list):
+        for _i, value in enumerate(value_list):
             try:
                 new_value_list.append(float(value))
             except ValueError:
-                if value == "측정불가":
+                # 측정불가와 셀의 값이 0인것
+                if value == "측정불가" or self.__is_zero__(value):
                     new_value_list.append(float(0))
-                    # print(key, i, value)
                 else:
-                    print(key, i, value)
-                    # ch = value[0]
-                    # if ch == ">" or ch == "<":
-                    #     print(key, i, value)
-                    # pass
+                    ch = value[0]
+                    if ch == ">" or ch == "<":
+                        new_value_list.append(float(value[1:]))
+                    else:
+                        if value.find("이상") > 0:
+                            v = value.split("이상")[0].strip()
+                            new_value_list.append(float(v))
+                        elif value.find("이하") > 0:
+                            v = value.split("이하")[0].strip()
+                            new_value_list.append(float(v))
+                        else:
+                            v = value.split("(")[0].strip()
+                            new_value_list.append(float(v))
 
         return new_value_list
 
+    def __is_zero__(self, string):
+        is_zero = True
+        for ch in string:
+            if ch != '.':
+                is_zero = False
+        return is_zero
+
     def fit(self, data_dict, data_count):
-        def __init_x_vector__():
-            _x_vector = list()
+        def __init_x_vector_dict__():
+            _x_vector_dict = OrderedDict()
+            _x_vector_dict["merge"] = list()
+            for _columns_key in columns_dict:
+                _x_vector_dict[_columns_key] = list()
 
             # set X(number of rows) using rows_data
             # array dimension = X * Y(number of data)
-            for _i in range(data_count):
-                _x_vector.append(list())
+            for _key in _x_vector_dict:
+                for _i in range(data_count):
+                    _x_vector_dict[_key].append(list())
 
-            return _x_vector
+            return _x_vector_dict
 
         def __make_vector_use_scalar__():
             value_list = self.__set_scalar_value_list__(k, v)
@@ -204,25 +235,22 @@ class MyOneHotEncoder:
                 else:
                     _value = (_value - minimum + MIN_SCALING)/(division + MIN_SCALING)
 
-                x_vector[_i].append(_value)
+                x_vector_dict["merge"][_i].append(_value)
+                x_vector_dict[columns_key][_i].append(_value)
 
         def __make_vector_use_class__():
-            def __is_zero__(string):
-                is_zero = True
-                for ch in string:
-                    if ch != '.':
-                        is_zero = False
-                return is_zero
 
             _value = str(value).strip()
-            if __is_zero__(_value):
+            if self.__is_zero__(_value):
                 _value = str(0)
-                
+
             for c in class_list:
                 if c == _value:
-                    x_vector[i].append(float(1))
+                    x_vector_dict["merge"][i].append(float(1))
+                    x_vector_dict[columns_key][i].append(float(1))
                 else:
-                    x_vector[i].append(float(0))
+                    x_vector_dict["merge"][i].append(float(0))
+                    x_vector_dict[columns_key][i].append(float(0))
 
         def __get_all_columns__(_columns_dict):
             all_columns = list()
@@ -231,23 +259,23 @@ class MyOneHotEncoder:
 
             return all_columns
 
-        x_vector = __init_x_vector__()
+        x_vector_dict = __init_x_vector_dict__()
 
         for k, v in data_dict.items():
-            for columns in columns_dict.values():
-                for columns_key in columns:
-                    if columns_key == "scalar":
-                        if k in __get_all_columns__(columns[columns_key]):
+            for columns_key, columns in columns_dict.items():
+                for columns_type_key in columns:
+                    if columns_type_key == "scalar":
+                        if k in __get_all_columns__(columns[columns_type_key]):
                             encode_dict = self.vector_dict[k]
                             minimum = encode_dict["min"]
                             maximum = encode_dict["max"]
                             division = encode_dict["div"]
                             __make_vector_use_scalar__()
-                    elif columns_key == "class":
-                        if k in columns[columns_key]:
+                    elif columns_type_key == "class":
+                        if k in columns[columns_type_key]:
                             encode_dict = self.vector_dict[k]
                             class_list = encode_dict.keys()
                             for i, value in enumerate(v):
                                 __make_vector_use_class__()
 
-        return x_vector
+        return x_vector_dict

@@ -174,8 +174,8 @@ class MyTrain:
             logistic_plot.set_xlabel("1 - specificity")
 
         for k_fold in range(self.num_fold):
-            x_train = self.vector_list[k_fold]["x_train"]
-            x_test = self.vector_list[k_fold]["x_test"]
+            x_train = self.vector_list[k_fold]["x_train"]["merge"]
+            x_test = self.vector_list[k_fold]["x_test"]["merge"]
             y_train = self.vector_list[k_fold]["y_train"]
             y_test = self.vector_list[k_fold]["y_test"]
 
