@@ -57,8 +57,6 @@ class MyOneHotEncoder:
                 # 공백은 사전에 넣지 않음
                 if not math.isnan(i):
                     scalar_list.append(i)
-                # else:
-                #     print(i)
 
             scalar_list = scalar_list[except_start:]
 
@@ -69,23 +67,38 @@ class MyOneHotEncoder:
             scalar_dict["max"] = scalar_list[-1]
             scalar_dict["div"] = float(scalar_dict["max"] - scalar_dict["min"])
 
-            print("\n" + k)
-            print(scalar_list)
-            print(scalar_dict)
+            # print("\n" + k)
+            # print(scalar_list)
+            # print(scalar_dict)
 
             return scalar_dict
 
         # 셀의 공백은 type is not str 으로 찾을 수 있으며, 공백(nan)을 하나의 차원으로 볼지에 대한 선택을 우선 해야한다
         def __set_class_dict__(vector_list):
+            def __is_zero__(string):
+                is_zero = True
+                for ch in string:
+                    if ch != '.':
+                        is_zero = False
+                return is_zero
+
             class_dict = dict()
 
             for i, v in enumerate(vector_list):
-                if v not in class_dict:
-                    class_dict[v] = 0
+                v = str(v).strip()
 
-                class_dict[v] += 1
+                # key exception is nan
+                if v != "nan":
+                    if __is_zero__(v):
+                        v = str(0)
+
+                    if v not in class_dict:
+                        class_dict[v] = 1
+                    else:
+                        class_dict[v] += 1
 
             return class_dict
+
 
         # def _set_symptom_dict():
         #     symptom_dict = dict()
@@ -104,17 +117,6 @@ class MyOneHotEncoder:
         #             symptom_dict[symptom] += 1
         #
         #     return symptom_dict
-
-        # # show result of columns inspecting
-        # k_dict = dict()
-        #
-        # for k, v in data_dict.items():
-        #
-        #     type_dict = __set_type_dict__(v)
-        #     k_dict[k] = type_dict
-        #
-        # for k in sorted(k_dict.keys()):
-        #     print(k, k_dict[k])
 
         # __inspect_columns__()
         # __inspect_float_column__()
@@ -169,20 +171,24 @@ class MyOneHotEncoder:
                     new_value_list.append(float(0))
                     # print(key, i, value)
                 else:
-                    pass
+                    print(key, i, value)
+                    # ch = value[0]
+                    # if ch == ">" or ch == "<":
+                    #     print(key, i, value)
+                    # pass
 
         return new_value_list
 
     def fit(self, data_dict, data_count):
-        def __init_x_data__():
-            _x_data = list()
+        def __init_x_vector__():
+            _x_vector = list()
 
             # set X(number of rows) using rows_data
             # array dimension = X * Y(number of data)
             for _i in range(data_count):
-                _x_data.append(list())
+                _x_vector.append(list())
 
-            return _x_data
+            return _x_vector
 
         def __make_vector_use_scalar__():
             value_list = self.__set_scalar_value_list__(k, v)
@@ -198,23 +204,34 @@ class MyOneHotEncoder:
                 else:
                     _value = (_value - minimum + MIN_SCALING)/(division + MIN_SCALING)
 
-                x_data[_i].append(_value)
+                x_vector[_i].append(_value)
 
         def __make_vector_use_class__():
+            def __is_zero__(string):
+                is_zero = True
+                for ch in string:
+                    if ch != '.':
+                        is_zero = False
+                return is_zero
+
+            _value = str(value).strip()
+            if __is_zero__(_value):
+                _value = str(0)
+                
             for c in class_list:
-                if c == value:
-                    x_data[i].append(float(1))
+                if c == _value:
+                    x_vector[i].append(float(1))
                 else:
-                    x_data[i].append(float(0))
+                    x_vector[i].append(float(0))
 
-        def __get_all_columns__(columns_dict):
-            _columns = list()
-            for columns in columns_dict.values():
-                _columns += columns
+        def __get_all_columns__(_columns_dict):
+            all_columns = list()
+            for _columns in _columns_dict.values():
+                all_columns += _columns
 
-            return _columns
+            return all_columns
 
-        x_data = __init_x_data__()
+        x_vector = __init_x_vector__()
 
         for k, v in data_dict.items():
             for columns in columns_dict.values():
@@ -233,4 +250,4 @@ class MyOneHotEncoder:
                             for i, value in enumerate(v):
                                 __make_vector_use_class__()
 
-        return x_data
+        return x_vector
