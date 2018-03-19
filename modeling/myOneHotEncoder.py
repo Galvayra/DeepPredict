@@ -10,25 +10,43 @@ class MyOneHotEncoder:
         self.vector_dict = dict()
 
     def encoding(self, data_dict):
-        def __inspect_column__(value_list):
-            type_dict = dict()
-            for i, value in enumerate(value_list):
-                key = 0
-                if type(value) is float:
-                    if math.isnan(value):
-                        continue
-                    key = "float"
-                elif type(value) is str:
-                    key = "str"
-                elif type(value) is int:
-                    key = "int"
+        def __inspect_columns__():
+            # show result of columns inspecting
+            k_dict = dict()
 
-                if key not in type_dict:
-                    type_dict[key] = 1
-                else:
-                    type_dict[key] += 1
+            for _k, v in data_dict.items():
+                type_dict = dict()
 
-            return type_dict
+                for i, value in enumerate(data_dict[_k]):
+                    key = 0
+                    if type(value) is float:
+                        if math.isnan(value):
+                            continue
+                        key = "float"
+                    elif type(value) is str:
+                        key = "str"
+                    elif type(value) is int:
+                        key = "int"
+
+                    if key not in type_dict:
+                        type_dict[key] = 1
+                    else:
+                        type_dict[key] += 1
+
+                k_dict[_k] = type_dict
+
+            for _k in sorted(k_dict.keys()):
+                print(_k, k_dict[_k])
+
+        # columns 이 전부 float 형에 어긋나는 행과 데이터를 출력
+        def __inspect_float_column__():
+            for _k in sorted(data_dict.keys()):
+                if _k in blood_count_columns['scalar']:
+                    for i, v in enumerate(data_dict[_k]):
+                        try:
+                            v = float(v)
+                        except ValueError:
+                            print(_k, v, "(", i, ")")
 
         # scalar dictionary 생성을 위해 앞 뒤 예외처리를 해야하는지 각 column 마다 확인해주어야 한다
         def __set_scalar_dict__(value_list, except_start=0, except_end=0):
@@ -39,24 +57,21 @@ class MyOneHotEncoder:
                 # 공백은 사전에 넣지 않음
                 if not math.isnan(i):
                     scalar_list.append(i)
+                # else:
+                #     print(i)
 
             scalar_list = scalar_list[except_start:]
 
             for i in range(except_end):
                 scalar_list.pop()
 
-            # 공백을 체크하는 영역
-            # for i, value in enumerate(value_list):
-            #     if math.isnan(value):
-            #         print(k, i, value)
-
             scalar_dict["min"] = scalar_list[0]
             scalar_dict["max"] = scalar_list[-1]
             scalar_dict["div"] = float(scalar_dict["max"] - scalar_dict["min"])
 
-            # print(k)
-            # print(scalar_list)
-            # print(scalar_dict)
+            print("\n" + k)
+            print(scalar_list)
+            print(scalar_dict)
 
             return scalar_dict
 
@@ -71,7 +86,7 @@ class MyOneHotEncoder:
                 class_dict[v] += 1
 
             return class_dict
-        #
+
         # def _set_symptom_dict():
         #     symptom_dict = dict()
         #
@@ -95,29 +110,71 @@ class MyOneHotEncoder:
         #
         # for k, v in data_dict.items():
         #
-        #     type_dict = __inspect_column__(v)
+        #     type_dict = __set_type_dict__(v)
         #     k_dict[k] = type_dict
         #
         # for k in sorted(k_dict.keys()):
         #     print(k, k_dict[k])
 
-        for k in sorted(data_dict.keys()):
-            if k in scalar_columns["0"]:
-                self.vector_dict[k] = __set_scalar_dict__(data_dict[k], except_start=0, except_end=0)
-            elif k in scalar_columns["start_1"]:
-                self.vector_dict[k] = __set_scalar_dict__(data_dict[k], except_start=1, except_end=0)
-            # elif k in scalar_columns["end_1"]:
-            #     self.vector_dict[k] = __set_scalar_dict__(data_dict[k], except_start=0, except_end=1)
-            elif k in scalar_columns["start_1_end_1"]:
-                self.vector_dict[k] = __set_scalar_dict__(data_dict[k], except_start=1, except_end=1)
-            elif k in class_columns:
-                self.vector_dict[k] = __set_class_dict__(data_dict[k])
+        # __inspect_columns__()
+        # __inspect_float_column__()
 
-            # if k in class_columns:
-            #     self.vector_dict[k] = __set_class_dict__(data_dict[k])
+        def __set_vector_dict__():
+            def __get_scalar_key__(_key):
+                _key_list = _key.split('#')
+
+                if len(_key_list) == 2:
+                    _start = int(_key_list[0].split('_')[1])
+                    _end = int(_key_list[1].split('_')[1])
+                else:
+                    _key_list = _key_list[0].split('_')
+
+                    if len(_key_list) == 2:
+                        if _key_list[0] == "start":
+                            _start = int(_key_list[1])
+                            _end = 0
+                        else:
+                            _start = 0
+                            _end = int(_key_list[1])
+                    else:
+                        _start = 0
+                        _end = 0
+
+                return _start, _end
+
+            if columns_key == "scalar":
+                for scalar_key, scalar_columns in columns[columns_key].items():
+                    start, end = __get_scalar_key__(scalar_key)
+                    if k in columns[columns_key][scalar_key]:
+                        v_list = self.__set_scalar_value_list__(k, data_dict[k])
+                        self.vector_dict[k] = __set_scalar_dict__(v_list, except_start=start, except_end=end)
+
+            elif columns_key == "class":
+                if k in columns[columns_key]:
+                    self.vector_dict[k] = __set_class_dict__(data_dict[k])
+
+        for k in sorted(data_dict.keys()):
+            for columns in columns_dict.values():
+                for columns_key in columns:
+                    __set_vector_dict__()
+
+    def __set_scalar_value_list__(self, key, value_list):
+        new_value_list = list()
+
+        for i, value in enumerate(value_list):
+            try:
+                new_value_list.append(float(value))
+            except ValueError:
+                if value == "측정불가":
+                    new_value_list.append(float(0))
+                    # print(key, i, value)
+                else:
+                    pass
+
+        return new_value_list
 
     def fit(self, data_dict, data_count):
-        def ___init_x_data__():
+        def __init_x_data__():
             _x_data = list()
 
             # set X(number of rows) using rows_data
@@ -128,7 +185,9 @@ class MyOneHotEncoder:
             return _x_data
 
         def __make_vector_use_scalar__():
-            for _i, _value in enumerate(v):
+            value_list = self.__set_scalar_value_list__(k, v)
+            for _i, _value in enumerate(value_list):
+                # type is float
                 if math.isnan(_value):
                     _value = float(0)
                 elif _value < minimum:
@@ -155,25 +214,23 @@ class MyOneHotEncoder:
 
             return _columns
 
-        x_data = ___init_x_data__()
+        x_data = __init_x_data__()
 
         for k, v in data_dict.items():
-            if k in __get_all_columns__(scalar_columns):
-                encode_dict = self.vector_dict[k]
-                minimum = encode_dict["min"]
-                maximum = encode_dict["max"]
-                division = encode_dict["div"]
-                __make_vector_use_scalar__()
-            elif k in class_columns:
-                encode_dict = self.vector_dict[k]
-                class_list = encode_dict.keys()
-                for i, value in enumerate(v):
-                    __make_vector_use_class__()
-
-            # if k in class_columns:
-            #     encode_dict = self.vector_dict[k]
-            #     class_list = encode_dict.keys()
-            #     for i, value in enumerate(v):
-            #         __make_vector_use_class__()
+            for columns in columns_dict.values():
+                for columns_key in columns:
+                    if columns_key == "scalar":
+                        if k in __get_all_columns__(columns[columns_key]):
+                            encode_dict = self.vector_dict[k]
+                            minimum = encode_dict["min"]
+                            maximum = encode_dict["max"]
+                            division = encode_dict["div"]
+                            __make_vector_use_scalar__()
+                    elif columns_key == "class":
+                        if k in columns[columns_key]:
+                            encode_dict = self.vector_dict[k]
+                            class_list = encode_dict.keys()
+                            for i, value in enumerate(v):
+                                __make_vector_use_class__()
 
         return x_data

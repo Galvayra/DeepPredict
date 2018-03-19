@@ -50,9 +50,11 @@ class MyVector:
         x_data_dict = self.my_data.data_dict
         y_data = self.my_data.y_data[:]
 
+        # init encoder
         my_encoder = MyOneHotEncoder()
         my_encoder.encoding(x_data_dict)
 
+        # fit encoder into data
         if IS_CLOSED:
             self.vector_list[0]["y_train"] = y_data
             self.vector_list[0]["y_test"] = y_data
