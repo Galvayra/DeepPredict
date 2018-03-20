@@ -9,10 +9,6 @@ class MyVector:
     def __init__(self, my_data):
         def __init_vector_list__():
             vector_dict = OrderedDict()
-            # vector_dict["x_train"] = list()
-            # vector_dict["y_train"] = list()
-            # vector_dict["x_test"] = list()
-            # vector_dict["y_test"] = list()
             vector_dict["x_train"] = dict()
             vector_dict["y_train"] = list()
             vector_dict["x_test"] = dict()
@@ -26,10 +22,8 @@ class MyVector:
         self.my_data = my_data
         self.file_name = my_data.file_name.split('.')[0]
         self.vector_list = __init_vector_list__()
-        self.__set_vector_list__()
-        self.__free__()
 
-    def __set_vector_list__(self):
+    def encoding(self):
         def __set_x_data_dict__(is_manual=False, is_test=False):
             x_dict = dict()
 
@@ -87,12 +81,11 @@ class MyVector:
                 self.vector_list[0]["y_train"] = y_data[subset_size:]
                 self.vector_list[0]["y_test"] = y_data[:subset_size]
                 num_train = len(self.vector_list[0]["y_train"])
-                num_test = len(self.vector_list[0]["y_test"])
-                self.vector_list[0]["x_train"] = my_encoder.fit(__set_x_data_dict__(is_manual=True), num_train)
-                self.vector_list[0]["x_test"] = my_encoder.fit(__set_x_data_dict__(is_manual=True,
-                                                                                            is_test=True), num_test)
+                # num_test = len(self.vector_list[0]["y_test"])
+                # self.vector_list[0]["x_train"] = my_encoder.fit(__set_x_data_dict__(is_manual=True), num_train)
+                # self.vector_list[0]["x_test"] = my_encoder.fit(__set_x_data_dict__(is_manual=True,
+                #                                                                    is_test=True), num_test)
 
-    def __free__(self):
         del self.my_data
 
     def dump(self):

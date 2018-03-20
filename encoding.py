@@ -5,6 +5,7 @@ from DeepPredict.modeling.vectorization import MyVector
 
 if __name__ == '__main__':
     myData = MyVector(DataHandler())
+    myData.encoding()
     myData.dump()
 
     # for pos, i in enumerate(myData.vector_list):

@@ -98,31 +98,23 @@ class MyOneHotEncoder:
             return class_dict
 
         def __set_symptom_dict__(vector_list):
+            def __add_dict__():
+                for word in word_list:
+                    if word not in symptom_dict:
+                        symptom_dict[word] = 1
+                    else:
+                        symptom_dict[word] += 1
+
             symptom_dict = dict()
 
-            _input = input("Input(EXIT) -")
+            for line in vector_list:
+                word_list = self.__get_word_list_symptom__(line)
+                __add_dict__()
 
-            while _input != "EXIT":
-
-                try:
-                    print(self.model.wv.most_similar(positive=[_input]))
-                except KeyError:
-                    print("not in vocab")
-
-                _input = input("Input(EXIT) -")
-            # for line in vector_list:
-            #     line = line.strip()
-            #     if line.endswith(";"):
-            #         line = line[:-1]
+            # print(len(symptom_dict))
+            # for dd in symptom_dict:
+            #     print(dd, symptom_dict[dd])
             #
-            #     for symptom in line.split(";"):
-            #         symptom = symptom.strip()
-            #
-            #         if symptom not in symptom_dict:
-            #             symptom_dict[symptom] = 0
-            #
-            #         symptom_dict[symptom] += 1
-
             return symptom_dict
 
         # __inspect_columns__()
@@ -162,15 +154,16 @@ class MyOneHotEncoder:
                 if k in columns[columns_key]:
                     self.vector_dict[k] = __set_class_dict__(data_dict[k])
 
-            # elif columns_key == "word":
-            #     if k in columns[columns_key]:
-            #         self.vector_dict[k] = __set_symptom_dict__(data_dict[k])
+            elif columns_key == "word":
+                if k in columns[columns_key]:
+                    self.vector_dict[k] = __set_symptom_dict__(data_dict[k])
 
         for k in sorted(data_dict.keys()):
             for columns in columns_dict.values():
                 for columns_key in columns:
                     __set_vector_dict__()
 
+    # str 형데이터를 scalar(float) 로 변환
     def __set_scalar_value_list__(self, key, value_list):
 
         new_value_list = list()
@@ -199,6 +192,51 @@ class MyOneHotEncoder:
 
         return new_value_list
 
+    # get word from symptom
+    def __get_word_list_symptom__(self, line):
+        def __parsing__(_w):
+            _w = _w.strip().lower()
+            _w = _w.replace('.', '. ')
+            _w = _w.replace('(', ' ')
+            _w = _w.replace(')', ' ')
+            _w = "_".join(_w.split())
+            _w = "_" + _w + "_"
+            _w = _w.replace('_abd._', '_abdominal_')
+            _w = _w.replace('_lt._', '_left_')
+            _w = _w.replace('_rt._', '_right_')
+            # _w = _w.replace('_lt.side_', '_left_')
+            # _w = _w.replace('_rt.side_', '_right_')
+            _w = _w.replace('_avf_', '_angioplasty_fails_')
+            _w = _w.replace('_ptbd_', '_percutaneous_transhepatic_biliary_drainage_')
+            _w = _w.replace('_bp_', '_blood_pressure_')
+            _w = _w.replace('_cbc_', '_complete_blood_count_')
+            _w = _w.replace('_ct_', '_computed_tomography_')
+            _w = _w.replace('_ekc_', '_computed_tomography_')
+            _w = _w.replace('_lft_', '_liver_function_tests_')
+            _w = _w.replace('_wbc_', '_white_blood_cell_')
+            _w = _w.replace('_llq_', '_left_lower_quadrant_')
+            _w = _w.replace('_luq_', '_left_upper_quadrant_')
+            _w = _w.replace('_rlq_', '_right_lower_quadrant_')
+            _w = _w.replace('_ruq_', '_right_upper_quadrant_')
+            _w = _w.replace('_ugi_', '_upper_gastrointestinal_')
+            _w = _w.replace('_hd_cath._', '_hemodialysis_catheter_')
+            _w = _w.replace('_cath._', '_catheter_')
+            _w = _w.replace('_exam._', '_examination_')
+            _w = _w.replace('_t-tube_', '_tracheostomy_tube_')
+            _w = _w.replace('_l-tube_', '_levin_tube_')
+            _w = _w.replace('_peg_tube_', '_percutaneous_endoscopic_gastrostomy_tube_')
+            _w = _w.replace('_op_', '_postoperative_')
+
+            return _w.replace('_', ' ').strip()
+
+        lines = line.split(',')
+        if len(lines) == 1:
+            w = lines[0]
+            return [__parsing__(w)]
+        else:
+            return [__parsing__(w) for w in lines]
+
+    # "..", "..." 등 을 확인
     def __is_zero__(self, string):
         is_zero = True
         for ch in string:
@@ -239,8 +277,8 @@ class MyOneHotEncoder:
                 x_vector_dict[columns_key][_i].append(_value)
 
         def __make_vector_use_class__():
-
             _value = str(value).strip()
+
             if self.__is_zero__(_value):
                 _value = str(0)
 
@@ -251,7 +289,29 @@ class MyOneHotEncoder:
                 else:
                     x_vector_dict["merge"][i].append(float(0))
                     x_vector_dict[columns_key][i].append(float(0))
+        
+        def __make_vector_use_word__():
+            _word_list = self.__get_word_list_symptom__(value)
 
+            # _input = input("Input(EXIT) -")
+            #
+            # while _input != "EXIT":
+            #
+            #     try:
+            #         print(self.model.wv.most_similar(positive=[_input]))
+            #     except KeyError:
+            #         print("not in vocab")
+            #
+            #     _input = input("Input(EXIT) -")
+
+            for c in class_list:
+                if c in _word_list:
+                    x_vector_dict["merge"][i].append(float(1))
+                    x_vector_dict[columns_key][i].append(float(1))
+                else:
+                    x_vector_dict["merge"][i].append(float(0))
+                    x_vector_dict[columns_key][i].append(float(0))
+        
         def __get_all_columns__(_columns_dict):
             all_columns = list()
             for _columns in _columns_dict.values():
@@ -277,5 +337,11 @@ class MyOneHotEncoder:
                             class_list = encode_dict.keys()
                             for i, value in enumerate(v):
                                 __make_vector_use_class__()
+                    elif columns_type_key == "word":
+                        if k in columns[columns_type_key]:
+                            encode_dict = self.vector_dict[k]
+                            class_list = encode_dict.keys()
+                            for i, value in enumerate(v):
+                                __make_vector_use_word__()
 
         return x_vector_dict
