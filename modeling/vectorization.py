@@ -49,7 +49,7 @@ class MyVector:
         y_data = self.my_data.y_data[:]
 
         # init encoder
-        my_encoder = MyOneHotEncoder(w2v=False)
+        my_encoder = MyOneHotEncoder(w2v=True)
         my_encoder.encoding(x_data_dict)
 
         # fit encoder into data

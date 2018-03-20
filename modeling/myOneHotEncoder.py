@@ -294,29 +294,46 @@ class MyOneHotEncoder:
                     x_vector_dict[columns_key][i].append(float(0))
         
         def __make_vector_use_word__():
+            def __make_one_hot__():
+                for _c in class_list:
+                    if _c in _word_list:
+                        x_vector_dict["merge"][i].append(float(1))
+                        x_vector_dict[columns_key][i].append(float(1))
+                    else:
+                        x_vector_dict["merge"][i].append(float(0))
+                        x_vector_dict[columns_key][i].append(float(0))
+
+            def __make_w2v_vector__(x_vector):
+                _div = len(w2v_vector_list)
+                if _div > 0:
+                    _vector = [0.0 for _v in range(len(w2v_vector_list[0]))]
+
+                    for vector in w2v_vector_list:
+                        for _index, _v in enumerate(vector):
+                            _vector[_index] += _v
+
+                    for _v in _vector:
+                        x_vector.append(_v/_div)
+                else:
+                    for _v in range(DIMENSION_W2V):
+                        x_vector.append(_v)
+
             _word_list = self.__get_word_list_symptom__(value)
 
             if self.w2v:
-                try:
-                    print(self.model.wv[input])
-                except KeyError:
-                    print("not in vocab")
+                w2v_vector_list = list()
 
-                for c in class_list:
-                    if c in _word_list:
-                        x_vector_dict["merge"][i].append(float(1))
-                        x_vector_dict[columns_key][i].append(float(1))
-                    else:
-                        x_vector_dict["merge"][i].append(float(0))
-                        x_vector_dict[columns_key][i].append(float(0))
+                for _word in _word_list:
+                    try:
+                        w2v_vector_list.append(self.model.wv[_word])
+                    except KeyError:
+                        pass
+
+                __make_one_hot__()
+                __make_w2v_vector__(x_vector_dict["merge"][i])
+                __make_w2v_vector__(x_vector_dict[columns_key][i])
             else:
-                for c in class_list:
-                    if c in _word_list:
-                        x_vector_dict["merge"][i].append(float(1))
-                        x_vector_dict[columns_key][i].append(float(1))
-                    else:
-                        x_vector_dict["merge"][i].append(float(0))
-                        x_vector_dict[columns_key][i].append(float(0))
+                __make_one_hot__()
 
         def __get_all_columns__(_columns_dict):
             all_columns = list()

@@ -4,4 +4,4 @@ clean:
 	rm -r logs
 
 clear:
-	rm modeling/vectors_*
+	rm modeling/vectors/vectors_*
