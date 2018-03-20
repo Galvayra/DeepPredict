@@ -85,26 +85,6 @@ class DataHandler:
 
             return _erase_index_dict, len(header_list)
 
-        def __condition_except_morality__(header_list, condition):
-            header_keys = [self.head_dict[i] for i in header_list]
-
-            _erase_index_dict = {i: 0 for i in range(len(self.rows_data[header_keys[0]]))}
-
-            for header_key in header_keys:
-                for index, value in enumerate(self.rows_data[header_key]):
-                    value = str(value)
-
-                    cell_mortality = self.rows_data[self.head_dict['DC']][index]
-                    if cell_mortality != "사망":
-                        if condition == 0:
-                            if value == str(condition) or value == str(0.0) or value == "nan":
-                                _erase_index_dict[index] += 1
-                        else:
-                            if value == str(condition):
-                                _erase_index_dict[index] += 1
-
-            return _erase_index_dict, len(header_list)
-
         def __append__(_erase_index_dict, _num_match, _individual=False):
             for index, v in _erase_index_dict.items():
                 if _individual and v >= _num_match:
@@ -152,9 +132,6 @@ class DataHandler:
                                                                  "AY", "BC", "BD", "BE", "BF", "BG", "BH", "BK", "BL"
                                                                  ], condition=0)
         __append__(erase_index_dict, 1, _individual=True)
-
-        # erase_index_dict, num_match = __condition_except_morality__(header_list=["BP"], condition=0)
-        # __append__(erase_index_dict, 1, _individual=True)
 
         __cut_random_data__(erase_index_list)
 
