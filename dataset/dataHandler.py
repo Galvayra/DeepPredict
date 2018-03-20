@@ -42,6 +42,7 @@ class DataHandler:
         return [self.__get_head_dict_key__(where) for where in range(start, end + 1)]
 
     def __set_data_dict__(self):
+
         data_dict = dict()
 
         # ["D", ... ,"CP"], D=3, CP=93
@@ -65,39 +66,96 @@ class DataHandler:
     def __set_erase_index_list__(self):
 
         # header keys 조건이 모두 만족 할 때
-        def __condition_all__(header_list, condition):
+        def __condition__(header_list, condition):
             header_keys = [self.head_dict[i] for i in header_list]
 
             _erase_index_dict = {i: 0 for i in range(len(self.rows_data[header_keys[0]]))}
 
             for header_key in header_keys:
                 for index, value in enumerate(self.rows_data[header_key]):
-                    if value == condition:
-                        _erase_index_dict[index] += 1
+                    value = str(value)
+
+                    if condition == 0:
+                        if value == str(condition) or value == str(0.0) or value == "nan":
+                            _erase_index_dict[index] += 1
+                    else:
+                        if value == str(condition):
+                            _erase_index_dict[index] += 1
 
             return _erase_index_dict, len(header_list)
 
-        def __append__(_erase_index_dict, _num_match):
+        def __condition_except_morality__(header_list, condition):
+            header_keys = [self.head_dict[i] for i in header_list]
+
+            _erase_index_dict = {i: 0 for i in range(len(self.rows_data[header_keys[0]]))}
+
+            for header_key in header_keys:
+                for index, value in enumerate(self.rows_data[header_key]):
+                    value = str(value)
+
+                    cell_mortality = self.rows_data[self.head_dict['DC']][index]
+                    if cell_mortality != "사망":
+                        if condition == 0:
+                            if value == str(condition) or value == str(0.0) or value == "nan":
+                                _erase_index_dict[index] += 1
+                        else:
+                            if value == str(condition):
+                                _erase_index_dict[index] += 1
+
+            return _erase_index_dict, len(header_list)
+
+        def __append__(_erase_index_dict, _num_match, _individual=False):
             for index, v in _erase_index_dict.items():
-                if v == _num_match:
+                if _individual and v >= _num_match:
+                    if index not in erase_index_list:
+                        erase_index_list.append(index)
+                elif not _individual and v == _num_match:
                     if index not in erase_index_list:
                         erase_index_list.append(index)
 
-        def __append_to_small__(header="A"):
-            for index, v in self.rows_data[header].items():
-                if math.isnan(v):
-                    erase_index_list.append(index)
+        def __append_no_data__(header_key="F"):
+            for index, v in self.rows_data[self.head_dict[header_key]].items():
+                if type(v) is float:
+                    if math.isnan(v):
+                        erase_index_list.append(index)
+                else:
+                    if v == "N/V":
+                        erase_index_list.append(index)
+
+        def __cut_random_data__(_erase_index_list):
+            r_num = int(CUT_RATIO.split('/')[1])
+            cut_count = 0
+            header_key = self.head_dict["DC"]
+            for i, data in enumerate(self.rows_data[header_key]):
+                if i not in _erase_index_list:
+                    if data != "사망":
+                        cut_count += 1
+                        if cut_count % r_num == 0:
+                            _erase_index_list.append(i)
 
         erase_index_list = list()
 
-        __append_to_small__()
-
         # G : 수축혈압, H : 이완혈압, I : 맥박수, J : 호흡수 == 0 제외
-        erase_index_dict, num_match = __condition_all__(header_list=["G", "H", "I", "J"], condition=0)
+        erase_index_dict, num_match = __condition__(header_list=["G", "H", "I", "J"], condition=0)
         __append__(erase_index_dict, num_match)
 
-        erase_index_dict, num_match = __condition_all__(header_list=["G", "H", "I", "J"], condition=-1)
+        erase_index_dict, num_match = __condition__(header_list=["G", "H", "I", "J"], condition=-1)
         __append__(erase_index_dict, num_match)
+
+        # 주증상 데이터가 없는 경우
+        __append_no_data__()
+
+        # 백혈구 데이터가 없는 경우
+        erase_index_dict, num_match = __condition__(header_list=["AE", "AF", "AG", "AH", "AI", "AM", "AN",
+                                                                 "AO", "AQ", "AR", "AS", "AT", "AU", "AV", "AW", "AX",
+                                                                 "AY", "BC", "BD", "BE", "BF", "BG", "BH", "BK", "BL"
+                                                                 ], condition=0)
+        __append__(erase_index_dict, 1, _individual=True)
+
+        erase_index_dict, num_match = __condition_except_morality__(header_list=["BP"], condition=0)
+        __append__(erase_index_dict, 1, _individual=True)
+
+        __cut_random_data__(erase_index_list)
 
         return sorted(erase_index_list, reverse=True)
 

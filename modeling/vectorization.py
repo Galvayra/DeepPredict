@@ -81,10 +81,10 @@ class MyVector:
                 self.vector_list[0]["y_train"] = y_data[subset_size:]
                 self.vector_list[0]["y_test"] = y_data[:subset_size]
                 num_train = len(self.vector_list[0]["y_train"])
-                # num_test = len(self.vector_list[0]["y_test"])
-                # self.vector_list[0]["x_train"] = my_encoder.fit(__set_x_data_dict__(is_manual=True), num_train)
-                # self.vector_list[0]["x_test"] = my_encoder.fit(__set_x_data_dict__(is_manual=True,
-                #                                                                    is_test=True), num_test)
+                num_test = len(self.vector_list[0]["y_test"])
+                self.vector_list[0]["x_train"] = my_encoder.fit(__set_x_data_dict__(is_manual=True), num_train)
+                self.vector_list[0]["x_test"] = my_encoder.fit(__set_x_data_dict__(is_manual=True,
+                                                                                   is_test=True), num_test)
 
         del self.my_data
 

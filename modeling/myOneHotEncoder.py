@@ -9,7 +9,8 @@ from .options import *
 class MyOneHotEncoder:
     def __init__(self, w2v=True):
         self.vector_dict = dict()
-        if w2v:
+        self.w2v = w2v
+        if self.w2v:
             self.model = word2vec.KeyedVectors.load_word2vec_format(DUMP_PATH + LOAD_WORD2VEC, binary=True)
             print("Read w2v file -", DUMP_PATH + LOAD_WORD2VEC)
 
@@ -114,7 +115,7 @@ class MyOneHotEncoder:
             # print(len(symptom_dict))
             # for dd in symptom_dict:
             #     print(dd, symptom_dict[dd])
-            #
+
             return symptom_dict
 
         # __inspect_columns__()
@@ -204,8 +205,6 @@ class MyOneHotEncoder:
             _w = _w.replace('_abd._', '_abdominal_')
             _w = _w.replace('_lt._', '_left_')
             _w = _w.replace('_rt._', '_right_')
-            # _w = _w.replace('_lt.side_', '_left_')
-            # _w = _w.replace('_rt.side_', '_right_')
             _w = _w.replace('_avf_', '_angioplasty_fails_')
             _w = _w.replace('_ptbd_', '_percutaneous_transhepatic_biliary_drainage_')
             _w = _w.replace('_bp_', '_blood_pressure_')
@@ -227,14 +226,18 @@ class MyOneHotEncoder:
             _w = _w.replace('_peg_tube_', '_percutaneous_endoscopic_gastrostomy_tube_')
             _w = _w.replace('_op_', '_postoperative_')
 
-            return _w.replace('_', ' ').strip()
+            return _w[1:-1].split('_')
 
         lines = line.split(',')
+        parsing_data_list = list()
         if len(lines) == 1:
             w = lines[0]
-            return [__parsing__(w)]
+            parsing_data_list = __parsing__(w)
         else:
-            return [__parsing__(w) for w in lines]
+            for w in lines:
+                parsing_data_list += __parsing__(w)
+
+        return parsing_data_list
 
     # "..", "..." 등 을 확인
     def __is_zero__(self, string):
@@ -293,25 +296,28 @@ class MyOneHotEncoder:
         def __make_vector_use_word__():
             _word_list = self.__get_word_list_symptom__(value)
 
-            # _input = input("Input(EXIT) -")
-            #
-            # while _input != "EXIT":
-            #
-            #     try:
-            #         print(self.model.wv.most_similar(positive=[_input]))
-            #     except KeyError:
-            #         print("not in vocab")
-            #
-            #     _input = input("Input(EXIT) -")
+            if self.w2v:
+                try:
+                    print(self.model.wv[input])
+                except KeyError:
+                    print("not in vocab")
 
-            for c in class_list:
-                if c in _word_list:
-                    x_vector_dict["merge"][i].append(float(1))
-                    x_vector_dict[columns_key][i].append(float(1))
-                else:
-                    x_vector_dict["merge"][i].append(float(0))
-                    x_vector_dict[columns_key][i].append(float(0))
-        
+                for c in class_list:
+                    if c in _word_list:
+                        x_vector_dict["merge"][i].append(float(1))
+                        x_vector_dict[columns_key][i].append(float(1))
+                    else:
+                        x_vector_dict["merge"][i].append(float(0))
+                        x_vector_dict[columns_key][i].append(float(0))
+            else:
+                for c in class_list:
+                    if c in _word_list:
+                        x_vector_dict["merge"][i].append(float(1))
+                        x_vector_dict[columns_key][i].append(float(1))
+                    else:
+                        x_vector_dict["merge"][i].append(float(0))
+                        x_vector_dict[columns_key][i].append(float(0))
+
         def __get_all_columns__(_columns_dict):
             all_columns = list()
             for _columns in _columns_dict.values():
