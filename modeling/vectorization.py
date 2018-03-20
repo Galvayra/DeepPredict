@@ -97,5 +97,5 @@ class MyVector:
 
         with open(file_name, 'w') as outfile:
             json.dump(self.vector_list, outfile, indent=4)
-            print("success make dump file! - file name is", file_name)
+            print("\nsuccess make dump file! - file name is", file_name)
 
