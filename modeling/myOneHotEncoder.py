@@ -12,7 +12,10 @@ class MyOneHotEncoder:
         self.w2v = w2v
         if self.w2v:
             self.model = word2vec.KeyedVectors.load_word2vec_format(DUMP_PATH + LOAD_WORD2VEC, binary=True)
-            print("Read w2v file -", DUMP_PATH + LOAD_WORD2VEC)
+            print("\nUsing word2vec")
+            print("\nRead w2v file -", DUMP_PATH + LOAD_WORD2VEC)
+        else:
+            print("\nNot using Word2vec")
 
     def encoding(self, data_dict):
         def __inspect_columns__():
@@ -316,7 +319,7 @@ class MyOneHotEncoder:
                         x_vector.append(_v/_div)
                 else:
                     for _v in range(DIMENSION_W2V):
-                        x_vector.append(_v)
+                        x_vector.append(float(0))
 
             _word_list = self.__get_word_list_symptom__(value)
 
@@ -332,6 +335,11 @@ class MyOneHotEncoder:
                 __make_one_hot__()
                 __make_w2v_vector__(x_vector_dict["merge"][i])
                 __make_w2v_vector__(x_vector_dict[columns_key][i])
+                # print(len(w2v_vector_list))
+                # print(x_vector_dict["merge"][i])
+                # print()
+                # print()
+                # print()
             else:
                 __make_one_hot__()
 

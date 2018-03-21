@@ -1,17 +1,23 @@
 # -*- coding: utf-8 -*-
 from DeepPredict.dataset.variables import DATA_FILE
 from DeepPredict.modeling.variables import DUMP_PATH, DUMP_FILE
-from DeepPredict.modeling.options import IS_CLOSED, NUM_FOLDS, RATIO
+from DeepPredict.modeling.options import IS_CLOSED, NUM_FOLDS, RATIO, USE_W2V
 from DeepPredict.learning.train import MyTrain
 import json
 
 
 if __name__ == '__main__':
     csv_name = DATA_FILE.split('.')[0]
-    if IS_CLOSED:
-        file_name = DUMP_PATH + DUMP_FILE + "_" + csv_name + "_closed"
+
+    if USE_W2V:
+        append_name = "_w2v_"
     else:
-        file_name = DUMP_PATH + DUMP_FILE + "_" + csv_name + "_opened_" + str(NUM_FOLDS)
+        append_name = "_"
+
+    if IS_CLOSED:
+        file_name = DUMP_PATH + DUMP_FILE + append_name + csv_name + "_closed"
+    else:
+        file_name = DUMP_PATH + DUMP_FILE + append_name + csv_name + "_opened_" + str(NUM_FOLDS)
     try:
         with open(file_name, 'r') as file:
             vector_list = json.load(file)

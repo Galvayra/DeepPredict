@@ -1,6 +1,6 @@
 from .myOneHotEncoder import MyOneHotEncoder
 from .variables import DUMP_FILE, DUMP_PATH
-from .options import IS_CLOSED, NUM_FOLDS, RATIO
+from .options import IS_CLOSED, NUM_FOLDS, RATIO, USE_W2V
 from collections import OrderedDict
 import json
 
@@ -49,7 +49,7 @@ class MyVector:
         y_data = self.my_data.y_data[:]
 
         # init encoder
-        my_encoder = MyOneHotEncoder(w2v=True)
+        my_encoder = MyOneHotEncoder(w2v=USE_W2V)
         my_encoder.encoding(x_data_dict)
 
         # fit encoder into data
@@ -90,10 +90,15 @@ class MyVector:
 
     def dump(self):
 
-        if IS_CLOSED:
-            file_name = DUMP_PATH + DUMP_FILE + '_' + self.file_name + "_closed"
+        if USE_W2V:
+            append_name = "_w2v_"
         else:
-            file_name = DUMP_PATH + DUMP_FILE + '_' + self.file_name + "_opened_" + str(NUM_FOLDS)
+            append_name = "_"
+
+        if IS_CLOSED:
+            file_name = DUMP_PATH + DUMP_FILE + append_name + self.file_name + "_closed"
+        else:
+            file_name = DUMP_PATH + DUMP_FILE + append_name + self.file_name + "_opened_" + str(NUM_FOLDS)
 
         with open(file_name, 'w') as outfile:
             json.dump(self.vector_list, outfile, indent=4)

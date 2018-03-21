@@ -37,7 +37,7 @@ class MyTrain:
 
         def __train_svm__():
 
-            model = SVC(kernel='rbf', C=1.0, random_state=None, probability=True)
+            model = SVC(kernel='linear', C=1.0, random_state=None, probability=True)
             model.fit(x_train, y_train)
             y_pred = model.predict(x_test)
             probas_ = model.predict_proba(x_test)
