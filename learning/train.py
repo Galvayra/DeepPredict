@@ -7,6 +7,8 @@ from sklearn.metrics import roc_curve, auc
 from DeepPredict.learning.options import *
 import time
 
+SVM_KERNEL = "linear"
+
 
 class MyTrain:
     def __init__(self, vector_list, is_closed):
@@ -36,8 +38,7 @@ class MyTrain:
             print(np.shape(x_test_np), np.shape(y_test_np))
 
         def __train_svm__():
-
-            model = SVC(kernel='linear', C=1.0, random_state=None, probability=True)
+            model = SVC(kernel=SVM_KERNEL, C=1.0, random_state=None, probability=True)
             model.fit(x_train, y_train)
             y_pred = model.predict(x_test)
             probas_ = model.predict_proba(x_test)
