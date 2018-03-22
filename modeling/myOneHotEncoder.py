@@ -78,8 +78,9 @@ class MyOneHotEncoder:
             scalar_dict["div"] = float(scalar_dict["max"] - scalar_dict["min"])
 
             # print("\n" + k)
-            # print(scalar_list)
+            # # print(scalar_list)
             # print(scalar_dict)
+            # print()
 
             return scalar_dict
 

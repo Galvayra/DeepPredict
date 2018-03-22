@@ -29,7 +29,8 @@ class MyTrain:
 
                 return _count
 
-            print("\n\ndims - ", len(x_train[0]))
+            print("\n\n\n\n=====================================\n")
+            print("dims - ", len(x_train[0]))
             print("learning count -", len(y_train), "\t mortality count -", __count_mortality__(y_train))
             print("test     count -", len(y_test), "\t mortality count -", __count_mortality__(y_test), "\n")
 
@@ -46,16 +47,23 @@ class MyTrain:
             _recall = recall_score(y_test, y_pred)
             _accuracy = accuracy_score(y_test, y_pred)
 
-            print('\n\nSVM')
-            print('Precision : %.2f' % (_precision*100))
-            print('Recall : %.2f' % (_recall*100))
-            print('Accuracy : %.2f' % (_accuracy*100))
+            if do_show:
+                print('\n\nSVM')
+                print('Precision : %.2f' % (_precision*100))
+                print('Recall : %.2f' % (_recall*100))
+                print('Accuracy : %.2f' % (_accuracy*100))
 
             return probas_, _accuracy, _precision, _recall
 
         def __logistic_regression__():
             def __init_log_file_name__(_k_fold):
-                log_name = "./logs/log_h_" + str(op.NUM_HIDDEN_LAYER) + "_ep_" + str(op.EPOCH) + "_" + str(_k_fold + 1)
+                if op.NUM_HIDDEN_LAYER < 10:
+                    log_name = "./logs/log_h_0"
+                else:
+                    log_name = "./logs/log_h_"
+
+                log_name += str(op.NUM_HIDDEN_LAYER) + "_ep_" + str(op.EPOCH) + "_k_" + str(_k_fold + 1)
+
                 if op.USE_W2V:
                     log_name += "_w2v"
 
@@ -118,7 +126,7 @@ class MyTrain:
                                                     feed_dict={tf_x: x_train, tf_y: y_train})
                     writer.add_summary(summary, global_step=step)
 
-                    if step % (op.EPOCH / 10) == 0:
+                    if do_show and step % (op.EPOCH / 10) == 0:
                         print(str(step).rjust(5), cost_val)
 
                 h, p, a = sess.run([hypothesis, predict, _accuracy], feed_dict={tf_x: x_test, tf_y: y_test})
@@ -134,6 +142,14 @@ class MyTrain:
             print('Accuracy : %.2f' % (a*100))
 
             return h, a, _precision, _recall
+
+        def __set_plt__():
+            logistic_fpr, logistic_tpr, _ = roc_curve(y_test, logistic_probas_)
+            roc_auc = auc(logistic_fpr, logistic_tpr)
+            logistic_plot.plot(logistic_fpr, logistic_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % roc_auc)
+            svm_fpr, svm_tpr, _ = roc_curve(y_test_np, svm_probas_[:, 1])
+            roc_auc = auc(svm_fpr, svm_tpr)
+            svm_plot.plot(svm_fpr, svm_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % roc_auc)
 
         def __show_plt__():
             logistic_plot.legend(loc="lower right")
@@ -186,21 +202,17 @@ class MyTrain:
             y_train_np = np.array([np.array(j) for j in y_train])
             y_test_np = np.array([np.array(j) for j in y_test])
 
-            __show_shape__()
+            if do_show:
+                __show_shape__()
 
             logistic_probas_, accuracy['logistic_regression'], precision['logistic_regression'], recall['logistic_regression'] = __logistic_regression__()
             svm_probas_, accuracy['svm'], precision['svm'], recall['svm'] = __train_svm__()
 
             if do_show:
-                logistic_fpr, logistic_tpr, _ = roc_curve(y_test, logistic_probas_)
-                roc_auc = auc(logistic_fpr, logistic_tpr)
-                logistic_plot.plot(logistic_fpr, logistic_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % roc_auc)
-                svm_fpr, svm_tpr, _ = roc_curve(y_test_np, svm_probas_[:, 1])
-                roc_auc = auc(svm_fpr, svm_tpr)
-                svm_plot.plot(svm_fpr, svm_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % roc_auc)
+                __set_plt__()
 
         print("\n\n processing time     --- %s seconds ---" % (time.time() - start_time))
         print("\n\n")
-        #
-        # if do_show:
-        #     __show_plt__()
+
+        if do_show:
+            __show_plt__()

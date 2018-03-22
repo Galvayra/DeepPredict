@@ -3,4 +3,4 @@ dataset/origin/
 modeling/vectors/
 reference/
 result/
-
+*.sh

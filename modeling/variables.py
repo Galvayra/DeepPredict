@@ -14,11 +14,11 @@ default_info_columns = {
 
 initial_info_columns = {
     "scalar": {
-        "0": ['G', 'I', 'L', 'M', 'N', 'O', 'Q'],
+        "0": ['G', 'I', 'L', 'M', 'N', 'O'],
         "start_1": ['H', 'J'],
         "start_1#end_1": ['K']
     },
-    "class": ['P', 'R', 'S', 'T'],
+    "class": ['P', 'Q', 'R', 'S', 'T'],
     "word": ['F']
 }
 

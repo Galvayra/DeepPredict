@@ -13,6 +13,8 @@ def get_arguments():
     parser.add_argument("-hidden", "--hidden", help="set a number of hidden layer (default is 0)"
                                                     "\ndefault is not using hidden layer for linear model"
                                                     "\nUseAge : python encoding.py -hidden 5 (non-linear)\n\n")
+    parser.add_argument("-show", "--show", help="show plot (default is 0)"
+                                                "\nUseAge : python encoding.py -show 1 (True)\n\n")
     _args = parser.parse_args()
 
     return _args
@@ -37,6 +39,19 @@ else:
             print("\nInput Error word2v option!\n")
             exit(-1)
 
+if not args.show:
+    DO_SHOW = 0
+else:
+    try:
+        DO_SHOW = int(args.hidden)
+    except ValueError:
+        print("\nInput Error type of show option!\n")
+        exit(-1)
+    else:
+        if DO_SHOW != 1 and DO_SHOW != 0:
+            print("\nInput Error show option!\n")
+            exit(-1)
+
 if not args.epoch:
     EPOCH = 2000
 else:
@@ -49,7 +64,6 @@ else:
         if EPOCH < 100:
             print("\nInput Error epoch option!\n")
             exit(-1)
-
 
 if not args.hidden:
     NUM_HIDDEN_LAYER = 0
@@ -84,4 +98,3 @@ def show_options():
     print("num of hidden layers -", NUM_HIDDEN_LAYER)
 
     print("EPOCH -", EPOCH)
-    print("\n=====================================\n")

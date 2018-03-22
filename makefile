@@ -5,3 +5,7 @@ clean:
 
 clear:
 	rm modeling/vectors/vectors_*
+
+clean_result:
+	rm result/*
+
