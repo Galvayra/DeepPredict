@@ -1,24 +1,23 @@
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
+import DeepPredict.arguments as op
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.metrics import roc_curve, auc
-from DeepPredict.learning.options import *
 import time
 
 SVM_KERNEL = "linear"
+
+RATIO = 10
+NUM_HIDDEN_DIMENSION = 0
 
 
 class MyTrain:
     def __init__(self, vector_list, is_closed):
         self.vector_list = vector_list
         self.num_fold = len(self.vector_list)
-        self.epoch = EPOCH
         self.is_closed = is_closed
-
-    def set_epoch(self, epoch):
-        self.epoch = epoch
 
     def training(self, do_show=True):
         def __show_shape__():
@@ -55,6 +54,13 @@ class MyTrain:
             return probas_, _accuracy, _precision, _recall
 
         def __logistic_regression__():
+            def __init_log_file_name__(_k_fold):
+                log_name = "./logs/log_h_" + str(op.NUM_HIDDEN_LAYER) + "_ep_" + str(op.EPOCH) + "_" + str(_k_fold + 1)
+                if op.USE_W2V:
+                    log_name += "_w2v"
+
+                return log_name
+
             num_input_node = len(x_train[0])
 
             if NUM_HIDDEN_DIMENSION:
@@ -69,12 +75,7 @@ class MyTrain:
             tf_bias = list()
             tf_layer = [tf_x]
 
-            print("\nepoch -", EPOCH)
-            if NUM_HIDDEN_LAYER:
-                print("num of  hidden layers  -", NUM_HIDDEN_LAYER)
-                print("num of nodes in hidden -", num_hidden_node, "\n\n")
-
-            for i in range(NUM_HIDDEN_LAYER):
+            for i in range(op.NUM_HIDDEN_LAYER):
                 if i == 0:
                     tf_weight.append(tf.get_variable("h_weight_" + str(i+1), dtype=tf.float32,
                                                      shape=[num_input_node, num_hidden_node],
@@ -105,19 +106,19 @@ class MyTrain:
 
             with tf.Session() as sess:
                 merged_summary = tf.summary.merge_all()
-                writer = tf.summary.FileWriter("./logs/log_0" + str(k_fold + 1))
+                writer = tf.summary.FileWriter(__init_log_file_name__(k_fold))
                 writer.add_graph(sess.graph)  # Show the graph
 
                 sess.run(tf.global_variables_initializer())
                 sess.run(tf.local_variables_initializer())
 
                 # if self.is_closed:
-                for step in range(EPOCH + 1):
+                for step in range(op.EPOCH + 1):
                     summary, cost_val, _ = sess.run([merged_summary, cost, train],
                                                     feed_dict={tf_x: x_train, tf_y: y_train})
                     writer.add_summary(summary, global_step=step)
 
-                    if step % (EPOCH / 10) == 0:
+                    if step % (op.EPOCH / 10) == 0:
                         print(str(step).rjust(5), cost_val)
 
                 h, p, a = sess.run([hypothesis, predict, _accuracy], feed_dict={tf_x: x_test, tf_y: y_test})
@@ -198,7 +199,8 @@ class MyTrain:
                 roc_auc = auc(svm_fpr, svm_tpr)
                 svm_plot.plot(svm_fpr, svm_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % roc_auc)
 
-        print("processing time     --- %s seconds ---" % (time.time() - start_time))
-
-        if do_show:
-            __show_plt__()
+        print("\n\n processing time     --- %s seconds ---" % (time.time() - start_time))
+        print("\n\n")
+        #
+        # if do_show:
+        #     __show_plt__()

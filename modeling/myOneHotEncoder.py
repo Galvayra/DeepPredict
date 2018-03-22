@@ -2,7 +2,9 @@
 import math
 import gensim.models.keyedvectors as word2vec
 from .variables import *
-from .options import *
+
+DIMENSION_W2V = 300
+MIN_SCALING = 0.1
 
 
 # initial information & Past history 만을 이용하여 학습

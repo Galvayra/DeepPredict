@@ -1,6 +1,6 @@
+import DeepPredict.arguments as op
 from .myOneHotEncoder import MyOneHotEncoder
 from .variables import DUMP_FILE, DUMP_PATH
-from .options import IS_CLOSED, NUM_FOLDS, RATIO, USE_W2V
 from collections import OrderedDict
 import json
 
@@ -46,11 +46,11 @@ class MyVector:
         y_data = self.my_data.y_data[:]
 
         # init encoder
-        my_encoder = MyOneHotEncoder(w2v=USE_W2V)
+        my_encoder = MyOneHotEncoder(w2v=op.USE_W2V)
         my_encoder.encoding(x_data_dict)
 
         # fit encoder into data
-        if IS_CLOSED:
+        if op.IS_CLOSED:
             y_train = y_data
             y_test = y_data
             x_train = my_encoder.fit(__set_x_data_dict__(), len(y_train))
@@ -58,10 +58,10 @@ class MyVector:
             self.vector_list.append(__init_vector_dict__())
         else:
             # k-fold validation
-            if NUM_FOLDS > 1:
-                subset_size = int(len(y_data) / NUM_FOLDS) + 1
+            if op.NUM_FOLDS > 1:
+                subset_size = int(len(y_data) / op.NUM_FOLDS) + 1
 
-                for i in range(NUM_FOLDS):
+                for i in range(op.NUM_FOLDS):
                     y_train = y_data[:i * subset_size] + y_data[(i + 1) * subset_size:]
                     y_test = y_data[i * subset_size:][:subset_size]
                     x_train = my_encoder.fit(__set_x_data_dict__(), len(y_train))
@@ -70,16 +70,13 @@ class MyVector:
 
             # one fold
             else:
-                subset_size = int(len(y_data) / RATIO)
+                subset_size = int(len(y_data) / op.RATIO)
 
                 y_train = y_data[subset_size:]
                 y_test = y_data[:subset_size]
                 x_train = my_encoder.fit(__set_x_data_dict__(), len(y_train))
                 x_test = my_encoder.fit(__set_x_data_dict__(is_test=True), len(y_test))
                 self.vector_list.append(__init_vector_dict__())
-
-        # for i in range(NUM_FOLDS):
-        #     print(self.vector_list[i]["x_test"])
 
         del self.my_data
 
@@ -93,15 +90,15 @@ class MyVector:
 
             return count
 
-        if USE_W2V:
+        if op.USE_W2V:
             append_name = "_w2v_"
         else:
             append_name = "_"
 
-        if IS_CLOSED:
+        if op.IS_CLOSED:
             file_name = DUMP_PATH + DUMP_FILE + append_name + self.file_name + "_closed"
         else:
-            file_name = DUMP_PATH + DUMP_FILE + append_name + self.file_name + "_opened_" + str(NUM_FOLDS)
+            file_name = DUMP_PATH + DUMP_FILE + append_name + self.file_name + "_opened_" + str(op.NUM_FOLDS)
 
         with open(file_name, 'w') as outfile:
             json.dump(self.vector_list, outfile, indent=4)
@@ -115,3 +112,4 @@ class MyVector:
                       "\tmortality count -", str(__counting_mortality__(self.vector_list[i]["y_train"])).rjust(4))
                 print("Test  total count -", str(len(self.vector_list[i]["x_test"]["merge"])).rjust(4),
                       "\tmortality count -", str(__counting_mortality__(self.vector_list[i]["y_test"])).rjust(4))
+            print()
