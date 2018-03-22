@@ -45,8 +45,9 @@ class DataHandler:
 
         data_dict = dict()
 
+        header_list = ["A"]
         # ["D", ... ,"CP"], D=3, CP=93
-        header_list = self.__set_header_list__(start=3, end=93)
+        header_list += self.__set_header_list__(start=3, end=93)
 
         for header in header_list:
             header_key = self.head_dict[header]
@@ -123,17 +124,17 @@ class DataHandler:
         erase_index_dict, num_match = __condition__(header_list=["G", "H", "I", "J"], condition=-1)
         __append__(erase_index_dict, num_match)
 
-        # 주증상 데이터가 없는 경우
-        __append_no_data__()
-
-        # 혈액관련 데이터가 없는 경우
-        erase_index_dict, num_match = __condition__(header_list=["AE", "AF", "AG", "AH", "AI", "AM", "AN",
-                                                                 "AO", "AQ", "AR", "AS", "AT", "AU", "AV", "AW", "AX",
-                                                                 "AY", "BC", "BD", "BE", "BF", "BG", "BH", "BK", "BL"
-                                                                 ], condition=0)
+        # # 주증상 데이터가 없는 경우
+        # __append_no_data__()
+        #
+        # # 혈액관련 데이터가 없는 경우
+        # erase_index_dict, num_match = __condition__(header_list=["AE", "AF", "AG", "AH", "AI", "AM", "AN",
+        #                                                          "AO", "AQ", "AR", "AS", "AT", "AU", "AV", "AW", "AX",
+        #                                                          "AY", "BC", "BD", "BE", "BF", "BG", "BH", "BK", "BL"
+        #                                                          ], condition=0)
         __append__(erase_index_dict, 1, _individual=True)
 
-        __cut_random_data__(erase_index_list)
+        # __cut_random_data__(erase_index_list)
 
         print("num of", len(erase_index_list), "data is excepted!\n")
 

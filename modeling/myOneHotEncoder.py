@@ -252,6 +252,7 @@ class MyOneHotEncoder:
 
     def fit(self, data_dict, data_count):
         def __init_x_vector_dict__():
+            # _x_vector_dict = OrderedDict()
             _x_vector_dict = OrderedDict()
             _x_vector_dict["merge"] = list()
             for _columns_key in columns_dict:
@@ -335,11 +336,6 @@ class MyOneHotEncoder:
                 __make_one_hot__()
                 __make_w2v_vector__(x_vector_dict["merge"][i])
                 __make_w2v_vector__(x_vector_dict[columns_key][i])
-                # print(len(w2v_vector_list))
-                # print(x_vector_dict["merge"][i])
-                # print()
-                # print()
-                # print()
             else:
                 __make_one_hot__()
 

@@ -1,9 +1,19 @@
 # -*- coding: utf-8 -*-
-from DeepPredict.dataset.variables import DATA_FILE
-from DeepPredict.modeling.variables import DUMP_PATH, DUMP_FILE
-from DeepPredict.modeling.options import IS_CLOSED, NUM_FOLDS, RATIO, USE_W2V
-from DeepPredict.learning.train import MyTrain
+import sys
 import json
+from os import path
+
+try:
+    from DeepPredict.dataset.variables import DATA_FILE
+    from DeepPredict.modeling.variables import DUMP_PATH, DUMP_FILE
+    from DeepPredict.modeling.options import IS_CLOSED, NUM_FOLDS, RATIO, USE_W2V
+    from DeepPredict.learning.train import MyTrain
+except ImportError:
+    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+    from DeepPredict.dataset.variables import DATA_FILE
+    from DeepPredict.modeling.variables import DUMP_PATH, DUMP_FILE
+    from DeepPredict.modeling.options import IS_CLOSED, NUM_FOLDS, RATIO, USE_W2V
+    from DeepPredict.learning.train import MyTrain
 
 
 if __name__ == '__main__':

@@ -30,7 +30,7 @@ class MyTrain:
 
                 return _count
 
-            print("dims - ", len(x_train[0]))
+            print("\n\ndims - ", len(x_train[0]))
             print("learning count -", len(y_train), "\t mortality count -", __count_mortality__(y_train))
             print("test     count -", len(y_test), "\t mortality count -", __count_mortality__(y_test), "\n")
 
