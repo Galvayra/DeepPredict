@@ -53,7 +53,11 @@ class MyTrain:
                 print('Recall : %.2f' % (_recall*100))
                 print('Accuracy : %.2f' % (_accuracy*100))
 
-            return probas_, _accuracy, _precision, _recall
+            __append_score__(accuracy["svm"], _accuracy)
+            __append_score__(precision["svm"], _precision)
+            __append_score__(recall["svm"], _recall)
+
+            return probas_
 
         def __logistic_regression__():
             def __init_log_file_name__(_k_fold):
@@ -136,12 +140,20 @@ class MyTrain:
             _precision = precision_score(y_test, p)
             _recall = recall_score(y_test, p)
 
-            print('\n\nlogistic regression')
-            print('Precision : %.2f' % (_precision*100))
-            print('Recall : %.2f' % (_recall*100))
-            print('Accuracy : %.2f' % (a*100))
+            if op.DO_SHOW:
+                print('\n\nlogistic regression')
+                print('Precision : %.2f' % (_precision*100))
+                print('Recall : %.2f' % (_recall*100))
+                print('Accuracy : %.2f' % (a*100))
 
-            return h, a, _precision, _recall
+            if _precision == 0 or _recall == 0:
+                print('k-fold : %d, Precision : %.2f, Recall : %.2f' % (k_fold, (_precision*100), (_recall*100)))
+
+            __append_score__(accuracy["logistic_regression"], a)
+            __append_score__(precision["logistic_regression"], _precision)
+            __append_score__(recall["logistic_regression"], _recall)
+
+            return h
 
         def __set_plt__():
             logistic_fpr, logistic_tpr, _ = roc_curve(y_test, logistic_probas_)
@@ -157,26 +169,26 @@ class MyTrain:
             plt.show()
 
         def __show_score__():
+            p_score = float()
+            r_score = float()
+
+            for p in precision["logistic_regression"]:
+                p_score += p
+            for r in recall["logistic_regression"]:
+                r_score += r
+
             print("\n\n======================================\n")
-            for k in precision:
-                print(k)
-                print("Total precision -", precision[k] / self.num_fold)
-                print()
+            print("Total precision - %.2f" % ((p_score / self.num_fold)*100))
+            print("Total recall -  %.2f" % ((r_score / self.num_fold)*100))
+            print("\n\n======================================\n")
 
-            for k in recall:
-                print(k)
-                print("Total recall -", recall[k] / self.num_fold)
-                print()
-
-            for k in accuracy:
-                print(k)
-                print("Total accuracy-Score -", accuracy[k] / self.num_fold)
-                print()
+        def __append_score__(_score_list, _score):
+            _score_list.append(_score)
 
         start_time = time.time()
-        accuracy = {"logistic_regression": 0, "svm": 0}
-        precision = {"logistic_regression": 0, "svm": 0}
-        recall = {"logistic_regression": 0, "svm": 0}
+        accuracy = {"logistic_regression": list(), "svm": list()}
+        precision = {"logistic_regression": list(), "svm": list()}
+        recall = {"logistic_regression": list(), "svm": list()}
 
         if do_show:
             fig = plt.figure(figsize=(10, 6))
@@ -205,8 +217,8 @@ class MyTrain:
             if do_show:
                 __show_shape__()
 
-            logistic_probas_, accuracy['logistic_regression'], precision['logistic_regression'], recall['logistic_regression'] = __logistic_regression__()
-            svm_probas_, accuracy['svm'], precision['svm'], recall['svm'] = __train_svm__()
+            logistic_probas_ = __logistic_regression__()
+            # svm_probas_ = __train_svm__()
 
             if do_show:
                 __set_plt__()
@@ -216,3 +228,5 @@ class MyTrain:
 
         if do_show:
             __show_plt__()
+
+        __show_score__()

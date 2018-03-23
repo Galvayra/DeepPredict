@@ -102,6 +102,8 @@ class MyOneHotEncoder:
                     else:
                         class_dict[v] += 1
 
+            # print(k, len(class_dict), class_dict)
+
             return class_dict
 
         def __set_symptom_dict__(vector_list):
@@ -216,7 +218,6 @@ class MyOneHotEncoder:
             _w = _w.replace('_bp_', '_blood_pressure_')
             _w = _w.replace('_cbc_', '_complete_blood_count_')
             _w = _w.replace('_ct_', '_computed_tomography_')
-            _w = _w.replace('_ekc_', '_computed_tomography_')
             _w = _w.replace('_lft_', '_liver_function_tests_')
             _w = _w.replace('_wbc_', '_white_blood_cell_')
             _w = _w.replace('_llq_', '_left_lower_quadrant_')
