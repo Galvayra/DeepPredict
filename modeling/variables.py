@@ -19,7 +19,7 @@ initial_info_columns = {
         "start_1#end_1": ['K']
     },
     "class": ['P', 'Q', 'R', 'S', 'T'],
-    "word": ['F']
+    "symptom": ['F']
 }
 
 past_history_columns = {
@@ -48,7 +48,8 @@ abga_columns = {
 }
 
 culture_columns = {
-    "class": ['CD', 'CE', 'CF', 'CG', 'CH', 'CI', 'CJ', 'CK', 'CL']
+    "class": ['CD', 'CE', 'CG', 'CH',  'CJ', 'CK'],
+    "word": ['CF', 'CI', 'CL']
 }
 
 influenza_columns = {

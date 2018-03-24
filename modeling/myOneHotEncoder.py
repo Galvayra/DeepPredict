@@ -106,6 +106,31 @@ class MyOneHotEncoder:
 
             return class_dict
 
+        def __set_word_dict__(vector_list):
+            def __add_dict__():
+                for word in word_list:
+                    if word not in word_dict:
+                        word_dict[word] = 1
+                    else:
+                        word_dict[word] += 1
+
+            word_dict = dict()
+
+            for line in vector_list:
+                if type(line) == float:
+                    word_list = ["0"]
+                else:
+                    # pass
+                    word_list = self.__get_word_list_culture__(line)
+                __add_dict__()
+
+            # print(k, len(word_dict), word_dict)
+            # print(len(word_dict))
+            # for dd in word_dict:
+            #     print(dd, word_dict[dd])
+
+            return word_dict
+
         def __set_symptom_dict__(vector_list):
             def __add_dict__():
                 for word in word_list:
@@ -163,9 +188,13 @@ class MyOneHotEncoder:
                 if k in columns[columns_key]:
                     self.vector_dict[k] = __set_class_dict__(data_dict[k])
 
-            elif columns_key == "word":
+            elif columns_key == "symptom":
                 if k in columns[columns_key]:
                     self.vector_dict[k] = __set_symptom_dict__(data_dict[k])
+
+            elif columns_key == "word":
+                if k in columns[columns_key]:
+                    self.vector_dict[k] = __set_word_dict__(data_dict[k])
 
         for k in sorted(data_dict.keys()):
             for columns in columns_dict.values():
@@ -244,7 +273,31 @@ class MyOneHotEncoder:
             for w in lines:
                 parsing_data_list += __parsing__(w)
 
-        return parsing_data_list
+        return list(set(parsing_data_list))
+
+    # get word from symptom
+    def __get_word_list_culture__(self, line):
+        def __parsing__(_w):
+            _w = _w.strip().lower()
+            _w = _w.replace('&', '')
+            _w = "_".join(_w.split())
+            _w = "_".join(_w.split("/"))
+            _w = "_".join(_w.split("->"))
+            _w = _w.replace('._', '_')
+            _w = "_" + _w + "_"
+
+            return _w[1:-1].split('_')
+
+        lines = line.split(',')
+        parsing_data_list = list()
+        if len(lines) == 1:
+            w = lines[0]
+            parsing_data_list = __parsing__(w)
+        else:
+            for w in lines:
+                parsing_data_list += __parsing__(w)
+
+        return list(set(parsing_data_list))
 
     # "..", "..." 등 을 확인
     def __is_zero__(self, string):
@@ -362,13 +415,13 @@ class MyOneHotEncoder:
                             maximum = encode_dict["max"]
                             division = encode_dict["div"]
                             __make_vector_use_scalar__()
-                    elif columns_type_key == "class":
+                    elif columns_type_key == "class" or columns_type_key == "word":
                         if k in columns[columns_type_key]:
                             encode_dict = self.vector_dict[k]
                             class_list = encode_dict.keys()
                             for i, value in enumerate(v):
                                 __make_vector_use_class__()
-                    elif columns_type_key == "word":
+                    elif columns_type_key == "symptom":
                         if k in columns[columns_type_key]:
                             encode_dict = self.vector_dict[k]
                             class_list = encode_dict.keys()

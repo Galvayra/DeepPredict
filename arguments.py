@@ -43,7 +43,7 @@ if not args.show:
     DO_SHOW = 0
 else:
     try:
-        DO_SHOW = int(args.hidden)
+        DO_SHOW = int(args.show)
     except ValueError:
         print("\nInput Error type of show option!\n")
         exit(-1)
