@@ -124,7 +124,6 @@ class MyOneHotEncoder:
                     word_list = self.__get_word_list_culture__(line)
                 __add_dict__()
 
-            # print(k, len(word_dict), word_dict)
             # print(len(word_dict))
             # for dd in word_dict:
             #     print(dd, word_dict[dd])
