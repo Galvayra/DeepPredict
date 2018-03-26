@@ -239,3 +239,33 @@ class MyTrain:
             __show_plt__()
 
         __show_score__()
+
+    def vector2txt(self, _file_name):
+        def __vector2txt__():
+            def __write_vector__(_w_file):
+                for dimension, v in enumerate(x):
+                    if v != 0:
+                        _w_file.write(str(dimension) + ":" + str(v) + token)
+                _w_file.write("\n")
+
+            with open("make/" + train_file_name + "_" + str(k_fold + 1) + ".txt", 'w') as train_file:
+                for x, y in zip(x_train, y_train):
+                    train_file.write(str(y[0]) + token)
+                    __write_vector__(train_file)
+
+            with open("make/" + test_file_name + "_" + str(k_fold + 1) + ".txt", 'w') as test_file:
+                for x, y in zip(x_test, y_test):
+                    test_file.write(str(y[0]) + token)
+                    __write_vector__(test_file)
+
+        token = " "
+        train_file_name = "train_" + _file_name
+        test_file_name = "test_" + _file_name
+
+        for k_fold in range(self.num_fold):
+            x_train = self.vector_list[k_fold]["x_train"]["merge"]
+            x_test = self.vector_list[k_fold]["x_test"]["merge"]
+            y_train = self.vector_list[k_fold]["y_train"]
+            y_test = self.vector_list[k_fold]["y_test"]
+
+            __vector2txt__()
