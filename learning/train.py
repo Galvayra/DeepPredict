@@ -8,8 +8,6 @@ from sklearn.metrics import roc_curve, auc
 import time
 
 SVM_KERNEL = "linear"
-
-RATIO = 10
 NUM_HIDDEN_DIMENSION = 0
 
 
@@ -171,15 +169,23 @@ class MyTrain:
         def __show_score__():
             p_score = float()
             r_score = float()
+            a_score = float()
+            auc_score = float()
 
             for p in precision["logistic_regression"]:
                 p_score += p
             for r in recall["logistic_regression"]:
                 r_score += r
+            for a in accuracy["logistic_regression"]:
+                a_score += a
+            for u in roc_auc["logistic_regression"]:
+                auc_score += u
 
             print("\n\n======================================\n")
             print("Total precision - %.2f" % ((p_score / self.num_fold)*100))
             print("Total recall -  %.2f" % ((r_score / self.num_fold)*100))
+            print("Total accuracy -  %.2f" % ((a_score / self.num_fold)*100))
+            print("Total auc -  %.2f" % ((auc_score / self.num_fold)*100))
             print("\n\n======================================\n")
 
         def __append_score__(_score_list, _score):
@@ -189,6 +195,7 @@ class MyTrain:
         accuracy = {"logistic_regression": list(), "svm": list()}
         precision = {"logistic_regression": list(), "svm": list()}
         recall = {"logistic_regression": list(), "svm": list()}
+        roc_auc = {"logistic_regression": list(), "svm": list()}
 
         if do_show:
             fig = plt.figure(figsize=(10, 6))
@@ -218,6 +225,8 @@ class MyTrain:
                 __show_shape__()
 
             logistic_probas_ = __logistic_regression__()
+            logistic_fpr, logistic_tpr, _ = roc_curve(y_test, logistic_probas_)
+            __append_score__(roc_auc["logistic_regression"], auc(logistic_fpr, logistic_tpr))
             # svm_probas_ = __train_svm__()
 
             if do_show:
