@@ -14,7 +14,9 @@ def get_arguments():
                                                   "\nUseAge : python encoding.py -epoch \n\n")
     parser.add_argument("-hidden", "--hidden", help="set a number of hidden layer (default is 0)"
                                                     "\ndefault is not using hidden layer for linear model"
-                                                    "\nUseAge : python encoding.py -hidden 5 (non-linear)\n\n")
+                                                    "\nUseAge : python encoding.py -hidden 2 (non-linear)\n\n")
+    parser.add_argument("-id", "--identify", help="set id for separating training sets (default is None)"
+                                                  "\nUseAge : python encoding.py -id string\n\n")
     parser.add_argument("-show", "--show", help="show plot (default is 0)"
                                                 "\nUseAge : python encoding.py -show 1 (True)\n\n")
     _args = parser.parse_args()
@@ -66,6 +68,11 @@ else:
         if DO_SHOW != 1 and DO_SHOW != 0:
             print("\nInput Error show option!\n")
             exit(-1)
+
+if not args.id:
+    USE_ID = str()
+else:
+    USE_ID = args.show
 
 if not args.epoch:
     EPOCH = 2000

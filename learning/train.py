@@ -93,12 +93,14 @@ class MyTrain:
 
         def __logistic_regression__():
             def __init_log_file_name__(_k_fold):
-                if op.NUM_HIDDEN_LAYER < 10:
-                    log_name = "./logs/log_h_0"
-                else:
-                    log_name = "./logs/log_h_"
+                log_name = "./logs/" + op.USE_ID + "_log_"
 
-                log_name += str(op.NUM_HIDDEN_LAYER) + "_ep_" + str(op.EPOCH) + "_k_" + str(_k_fold + 1)
+                if op.NUM_HIDDEN_LAYER < 10:
+                    log_name += "h_0" + str(op.NUM_HIDDEN_LAYER)
+                else:
+                    log_name += "h_" + str(op.NUM_HIDDEN_LAYER)
+
+                log_name += "_ep_" + str(op.EPOCH) + "_k_" + str(_k_fold + 1)
 
                 if op.USE_W2V:
                     log_name += "_w2v"
