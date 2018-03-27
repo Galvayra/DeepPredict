@@ -22,6 +22,9 @@ if __name__ == '__main__':
     else:
         append_name = ""
 
+    if op.USE_ID:
+        append_name += op.USE_ID
+
     if op.IS_CLOSED:
         file_name = append_name + csv_name + "_closed"
     else:
@@ -37,4 +40,4 @@ if __name__ == '__main__':
         op.show_options()
 
         train = MyTrain(vector_list)
-        train.training(do_show=op.DO_SHOW, tensor_save=TENSOR_PATH + op.USE_ID + "_" + file_name)
+        train.training(tensor_save=TENSOR_PATH + op.USE_ID + file_name)

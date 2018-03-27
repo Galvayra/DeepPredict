@@ -15,7 +15,7 @@ class MyTrain:
     def __init__(self, vector_list):
         self.vector_list = vector_list
 
-    def training(self, do_show=True, tensor_save=""):
+    def training(self, tensor_save=""):
         def __show_shape__():
             def __count_mortality__(_y_data_):
                 _count = 0
@@ -53,10 +53,10 @@ class MyTrain:
 
             print("\n\n============" + _key + "============\n")
             print("Total precision - %.2f" % ((p_score / op.NUM_FOLDS) * 100))
-            print("Total recall -  %.2f" % ((r_score / op.NUM_FOLDS) * 100))
-            print("Total F1-Score -  %.2f" % ((f_score / op.NUM_FOLDS) * 100))
-            print("Total accuracy -  %.2f" % ((a_score / op.NUM_FOLDS) * 100))
-            print("Total auc -  %.2f" % ((auc_score / op.NUM_FOLDS) * 100))
+            print("Total recall    -  %.2f" % ((r_score / op.NUM_FOLDS) * 100))
+            print("Total F1-Score  -  %.2f" % ((f_score / op.NUM_FOLDS) * 100))
+            print("Total accuracy  -  %.2f" % ((a_score / op.NUM_FOLDS) * 100))
+            print("Total auc       -  %.2f" % ((auc_score / op.NUM_FOLDS) * 100))
             print("\n\n======================================\n")
             
         def __append_score__(_score_list, _score):
@@ -89,11 +89,11 @@ class MyTrain:
                 print('F1-Score  : %.2f' % (_f1 * 100))
                 print('Accuracy  : %.2f' % (_accuracy * 100))
                 print('AUC       : %.2f' % (_auc * 100))
-                svm_plot.plot(_svm_fpr, _svm_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % roc_auc)
+                plot.plot(_svm_fpr, _svm_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % _auc)
 
         def __logistic_regression__():
             def __init_log_file_name__(_k_fold):
-                log_name = "./logs/" + op.USE_ID + "_log_"
+                log_name = "./logs/" + op.USE_ID + "log_"
 
                 if op.NUM_HIDDEN_LAYER < 10:
                     log_name += "h_0" + str(op.NUM_HIDDEN_LAYER)
@@ -181,7 +181,7 @@ class MyTrain:
                                                     feed_dict={tf_x: x_train, tf_y: y_train})
                     writer.add_summary(summary, global_step=step)
 
-                    if do_show and step % (op.EPOCH / 10) == 0:
+                    if op.DO_SHOW and step % (op.EPOCH / 10) == 0:
                         print(str(step).rjust(5), cost_val)
 
                 h, p, a = sess.run([hypothesis, predict, _accuracy], feed_dict={tf_x: x_test, tf_y: y_test})
@@ -213,13 +213,23 @@ class MyTrain:
                 print('F1-Score  : %.2f' % (_f1 * 100))
                 print('Accuracy  : %.2f' % (a * 100))
                 print('AUC       : %.2f' % (_auc * 100))
-                logistic_plot.plot(_logistic_fpr, _logistic_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % _auc)
+                plot.plot(_logistic_fpr, _logistic_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % _auc)
 
         def __show_plt__():
-            logistic_plot.legend(loc="lower right")
-            svm_plot.legend(loc="lower right")
+            plot.legend(loc="lower right")
             plt.show()
-            
+
+        def __init_plt__(_title):
+            _fig = plt.figure(figsize=(10, 6))
+            _fig.suptitle("ROC CURVE", fontsize=16)
+            _plot = plt.subplot2grid((2, 2), (0, 0))
+            _plot.set_title(_title)
+
+            _plot.set_ylabel("TPR (sensitivity)")
+            _plot.set_xlabel("1 - specificity")
+
+            return _plot
+
         start_time = time.time()
         accuracy = {"logistic_regression": list(), "svm": list()}
         precision = {"logistic_regression": list(), "svm": list()}
@@ -227,44 +237,40 @@ class MyTrain:
         roc_auc = {"logistic_regression": list(), "svm": list()}
         f1 = {"logistic_regression": list(), "svm": list()}
 
-        if do_show:
-            fig = plt.figure(figsize=(10, 6))
-            fig.suptitle("ROC CURVE", fontsize=16)
-            svm_plot = plt.subplot2grid((2, 2), (0, 0))
-            logistic_plot = plt.subplot2grid((2, 2), (0, 1))
-            svm_plot.set_title("SVM")
-            logistic_plot.set_title("Logistic regression")
-
-            svm_plot.set_ylabel("TPR (sensitivity)")
-            svm_plot.set_xlabel("1 - specificity")
-            logistic_plot.set_ylabel("TPR (sensitivity)")
-            logistic_plot.set_xlabel("1 - specificity")
+        if op.DO_SHOW:
+            if op.DO_SVM:
+                plot = __init_plt__("SVM")
+            else:
+                plot = __init_plt__("Logistic Regression")
 
         for k_fold in range(op.NUM_FOLDS):
             x_train = self.vector_list[k_fold]["x_train"]["merge"]
             x_test = self.vector_list[k_fold]["x_test"]["merge"]
             y_train = self.vector_list[k_fold]["y_train"]
             y_test = self.vector_list[k_fold]["y_test"]
-
             x_train_np = np.array([np.array(j) for j in x_train])
             x_test_np = np.array([np.array(j) for j in x_test])
             y_train_np = np.array([np.array(j) for j in y_train])
             y_test_np = np.array([np.array(j) for j in y_test])
 
-            if do_show:
+            if op.DO_SHOW:
                 __show_shape__()
 
-            __logistic_regression__()
-            __train_svm__()
+            if op.DO_SVM:
+                __train_svm__()
+            else:
+                __logistic_regression__()
 
         print("\n\n processing time     --- %s seconds ---" % (time.time() - start_time))
         print("\n\n")
 
-        if do_show:
-            __show_plt__()
+        if op.DO_SVM:
+            __show_score__("svm")
+        else:
+            __show_score__("logistic_regression")
 
-        __show_score__("logistic_regression")
-        __show_score__("svm")
+        if op.DO_SHOW:
+            __show_plt__()
 
     def vector2txt(self, _file_name):
         def __vector2txt__():

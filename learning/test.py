@@ -1,18 +1,17 @@
 import tensorflow as tf
-import numpy as np
 import matplotlib.pyplot as plt
 import DeepPredict.arguments as op
-from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import roc_curve, auc
 from .variables import NAME_Y, NAME_X, NAME_HYPO, NAME_PREDICT
+
 
 
 class MyTest:
     def __init__(self, vector_list):
         self.vector_list = vector_list
 
-    def test(self, tensor_load=""):
+    def predict(self, tensor_load=""):
         def __show_score__(_key):
             p_score = float()
             r_score = float()
@@ -41,7 +40,11 @@ class MyTest:
 
         def __append_score__(_score_list, _score):
             _score_list.append(_score)
-            
+
+        def __show_plt__():
+            logistic_plot.legend(loc="lower right")
+            plt.show()
+
         def __load__():
             if op.NUM_HIDDEN_LAYER < 10:
                 _hidden_ = "_h_0" + str(op.NUM_HIDDEN_LAYER)
@@ -62,22 +65,27 @@ class MyTest:
 
             h, p = sess.run([hypothesis, predict], feed_dict={tf_x: x_test, tf_y: y_test})
 
+            logistic_fpr, logistic_tpr, _ = roc_curve(y_test, h)
+
             _precision = precision_score(y_test, p)
             _recall = recall_score(y_test, p)
             _f1 = f1_score(y_test, p)
             _accuracy = accuracy_score(y_test, p)
+            _auc = auc(logistic_fpr, logistic_tpr)
 
-            print('Precision : %.2f' % (_precision * 100))
-            print('Recall : %.2f' % (_recall * 100))
-            print('F1-Score : %.2f' % (_f1 * 100))
-            print('Accuracy : %.2f' % (_accuracy * 100))
+            if op.DO_SHOW:
+                print('Precision : %.2f' % (_precision * 100))
+                print('Recall    : %.2f' % (_recall * 100))
+                print('F1-Score  : %.2f' % (_f1 * 100))
+                print('Accuracy  : %.2f' % (_accuracy * 100))
+                print('AUC       : %.2f' % (_auc * 100))
+                logistic_plot.plot(logistic_fpr, logistic_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % _auc)
 
             __append_score__(accuracy["logistic_regression"], _accuracy)
             __append_score__(precision["logistic_regression"], _precision)
             __append_score__(recall["logistic_regression"], _recall)
             __append_score__(f1["logistic_regression"], _f1)
-            logistic_fpr, logistic_tpr, _ = roc_curve(y_test, h)
-            __append_score__(roc_auc["logistic_regression"], auc(logistic_fpr, logistic_tpr))
+            __append_score__(roc_auc["logistic_regression"], _auc)
 
         accuracy = {"logistic_regression": list(), "svm": list()}
         precision = {"logistic_regression": list(), "svm": list()}
@@ -85,10 +93,22 @@ class MyTest:
         roc_auc = {"logistic_regression": list(), "svm": list()}
         f1 = {"logistic_regression": list(), "svm": list()}
 
+        if op.DO_SHOW:
+            fig = plt.figure(figsize=(10, 6))
+            fig.suptitle("ROC CURVE", fontsize=16)
+            logistic_plot = plt.subplot2grid((2, 2), (0, 0))
+            logistic_plot.set_title("Logistic regression")
+
+            logistic_plot.set_ylabel("TPR (sensitivity)")
+            logistic_plot.set_xlabel("1 - specificity")
+
         for k_fold in range(op.NUM_FOLDS):
             x_test = self.vector_list[k_fold]["x_test"]["merge"]
             y_test = self.vector_list[k_fold]["y_test"]
 
             __load__()
 
-        __show_score__("logistic_regression", precision, recall, f1, accuracy, roc_auc)
+        __show_score__("logistic_regression")
+
+        if op.DO_SHOW:
+            __show_plt__()

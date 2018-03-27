@@ -95,6 +95,9 @@ class MyVector:
         else:
             append_name = "_"
 
+        if op.USE_ID:
+            append_name += op.USE_ID
+
         if op.IS_CLOSED:
             file_name = DUMP_PATH + DUMP_FILE + append_name + self.file_name + "_closed"
         else:

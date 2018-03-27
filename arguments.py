@@ -4,8 +4,8 @@ parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 
 
 def get_arguments():
-    parser.add_argument("-test", "--test", help="test using trained NN (default is 0)"
-                                                "\nUseAge : python test.py -test 1 -w2v 1\n\n")
+    parser.add_argument("-svm", "--svm", help="training use support vector machine (default is 0)"
+                                              "\nUseAge : python test.py -svm 1 -w2v 1\n\n")
     parser.add_argument("-w2v", "--word2v", help="using word2vec (default is 1)"
                                                  "\nUseAge : python encoding.py -w2v 1 (True)"
                                                  "\n         python encoding.py -w2v 0 (False)\n\n")
@@ -30,16 +30,16 @@ IS_CLOSED = False
 
 args = get_arguments()
 
-if not args.test:
-    DO_TEST = False
+if not args.svm:
+    DO_SVM = False
 else:
     try:
-        DO_TEST = int(args.test)
+        DO_SVM = int(args.svm)
     except ValueError:
         print("\nInput Error type of test option!\n")
         exit(-1)
     else:
-        if DO_TEST != 1 and DO_TEST != 0:
+        if DO_SVM != 1 and DO_SVM != 0:
             print("\nInput Error test option!\n")
             exit(-1)
 
@@ -69,10 +69,10 @@ else:
             print("\nInput Error show option!\n")
             exit(-1)
 
-if not args.id:
+if not args.identify:
     USE_ID = str()
 else:
-    USE_ID = args.show
+    USE_ID = args.identify + "#"
 
 if not args.epoch:
     EPOCH = 2000
