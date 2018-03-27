@@ -11,7 +11,6 @@ from .variables import NAME_Y, NAME_X, NAME_HYPO, NAME_PREDICT
 class MyTest:
     def __init__(self, vector_list):
         self.vector_list = vector_list
-        self.num_fold = len(self.vector_list)
 
     def test(self, tensor_load=""):
         def __show_score__(_key):
@@ -86,7 +85,7 @@ class MyTest:
         roc_auc = {"logistic_regression": list(), "svm": list()}
         f1 = {"logistic_regression": list(), "svm": list()}
 
-        for k_fold in range(self.num_fold):
+        for k_fold in range(op.NUM_FOLDS):
             x_test = self.vector_list[k_fold]["x_test"]["merge"]
             y_test = self.vector_list[k_fold]["y_test"]
 

@@ -10,7 +10,7 @@ except ImportError:
 
 from DeepPredict.dataset.variables import DATA_FILE
 from DeepPredict.modeling.variables import DUMP_PATH, DUMP_FILE, TENSOR_PATH
-from DeepPredict.learning.train import MyTrain
+from DeepPredict.learning.test import MyTest
 import DeepPredict.arguments as op
 
 
@@ -36,6 +36,5 @@ if __name__ == '__main__':
         print("\nRead vectors -", file_name)
         op.show_options()
 
-        train = MyTrain(vector_list, op.IS_CLOSED)
-        train.test(tensor_load=TENSOR_PATH + file_name)
+        train = MyTest(vector_list)
 

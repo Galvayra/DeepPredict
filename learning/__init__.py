@@ -1,3 +1,3 @@
 from . import *
 
-__all__ = ['train.py', 'options.py']
+__all__ = ['test', 'train', 'variables']

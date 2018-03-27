@@ -36,5 +36,5 @@ if __name__ == '__main__':
         print("\nRead vectors -", DUMP_PATH + file_name)
         op.show_options()
 
-        train = MyTrain(vector_list, op.IS_CLOSED)
+        train = MyTrain(vector_list)
         train.vector2txt(file_name)
