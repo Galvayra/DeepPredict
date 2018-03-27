@@ -36,6 +36,5 @@ if __name__ == '__main__':
         print("\nRead vectors -", file_name)
         op.show_options()
 
-        train = MyTrain(vector_list, op.IS_CLOSED)
-        train.test(tensor_load=TENSOR_PATH + file_name)
-
+        train = MyTrain(vector_list)
+        train.training(do_show=op.DO_SHOW, tensor_save=TENSOR_PATH + file_name)

@@ -2,14 +2,14 @@ clean:
 	rm -r __pycache__
 	rm -r */__pycache__
 
-clean_log:
+clean-log:
 	rm -r logs
 
-clean_save:
+clean-save:
 	rm -rf modeling/save/*
 
-clean_result:
+clean-result:
 	rm result/*
 
-clean_vector:
+clean-vector:
 	rm -r modeling/vectors/vectors_*
