@@ -3,6 +3,8 @@ from collections import OrderedDict
 DUMP_PATH = "modeling/vectors/"
 DUMP_FILE = "vectors"
 
+TENSOR_PATH = "modeling/save/"
+
 LOAD_WORD2VEC = "GoogleNews-vectors-negative300.bin"
 
 default_info_columns = {

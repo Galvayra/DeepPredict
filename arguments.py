@@ -4,7 +4,9 @@ parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 
 
 def get_arguments():
-    parser.add_argument("-w2v", "--word2v", help="using word2vec (default is 0)"
+    parser.add_argument("-test", "--test", help="test using trained NN (default is 0)"
+                                                "\nUseAge : python test.py -test 1 -w2v 1\n\n")
+    parser.add_argument("-w2v", "--word2v", help="using word2vec (default is 1)"
                                                  "\nUseAge : python encoding.py -w2v 1 (True)"
                                                  "\n         python encoding.py -w2v 0 (False)\n\n")
     parser.add_argument("-epoch", "--epoch", help="set epoch for neural network (default is 2000)"
@@ -26,8 +28,21 @@ IS_CLOSED = False
 
 args = get_arguments()
 
+if not args.test:
+    DO_TEST = False
+else:
+    try:
+        DO_TEST = int(args.test)
+    except ValueError:
+        print("\nInput Error type of test option!\n")
+        exit(-1)
+    else:
+        if DO_TEST != 1 and DO_TEST != 0:
+            print("\nInput Error test option!\n")
+            exit(-1)
+
 if not args.word2v:
-    USE_W2V = False
+    USE_W2V = True
 else:
     try:
         USE_W2V = int(args.word2v)

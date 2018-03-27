@@ -3,21 +3,40 @@ import numpy as np
 import matplotlib.pyplot as plt
 import DeepPredict.arguments as op
 from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, precision_score, recall_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import roc_curve, auc
 import time
+import os
+import shutil
 
 SVM_KERNEL = "linear"
 NUM_HIDDEN_DIMENSION = 0
+RATIO_HIDDEN = 2
+
+NAME_HYPO = "hypothesis"
+NAME_PREDICT = "predict"
+NAME_X = "tf_x"
+NAME_Y = "tf_y"
 
 
 class MyTrain:
     def __init__(self, vector_list, is_closed):
+        def __init_nn_list__():
+            _nn_list = list()
+            for i in range(self.num_fold):
+                _nn_list.append(list())
+
+            return _nn_list
+
         self.vector_list = vector_list
         self.num_fold = len(self.vector_list)
         self.is_closed = is_closed
+        self.nn_list = __init_nn_list__()
 
-    def training(self, do_show=True):
+    def __append_score__(self, _score_list, _score):
+        _score_list.append(_score)
+
+    def training(self, do_show=True, tensor_save=""):
         def __show_shape__():
             def __count_mortality__(_y_data_):
                 _count = 0
@@ -44,18 +63,25 @@ class MyTrain:
             _precision = precision_score(y_test, y_pred)
             _recall = recall_score(y_test, y_pred)
             _accuracy = accuracy_score(y_test, y_pred)
+            _f1 = f1_score(y_test, y_pred)
+            _svm_fpr, _svm_tpr, _ = roc_curve(y_test, probas_[:, 1])
+            _auc = auc(_svm_fpr, _svm_tpr)
 
-            if do_show:
-                print('\n\nSVM')
-                print('Precision : %.2f' % (_precision*100))
-                print('Recall : %.2f' % (_recall*100))
-                print('Accuracy : %.2f' % (_accuracy*100))
+            self.__append_score__(accuracy["svm"], _accuracy)
+            self.__append_score__(precision["svm"], _precision)
+            self.__append_score__(recall["svm"], _recall)
+            self.__append_score__(f1["svm"], _f1)
+            self.__append_score__(roc_auc["svm"], _auc)
 
-            __append_score__(accuracy["svm"], _accuracy)
-            __append_score__(precision["svm"], _precision)
-            __append_score__(recall["svm"], _recall)
-
-            return probas_
+            if op.DO_SHOW:
+                print('\n\n')
+                print(k_fold + 1, "fold", 'SVM')
+                print('Precision : %.2f' % (_precision * 100))
+                print('Recall    : %.2f' % (_recall * 100))
+                print('F1-Score  : %.2f' % (_f1 * 100))
+                print('Accuracy  : %.2f' % (_accuracy * 100))
+                print('AUC       : %.2f' % (_auc * 100))
+                svm_plot.plot(_svm_fpr, _svm_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % roc_auc)
 
         def __logistic_regression__():
             def __init_log_file_name__(_k_fold):
@@ -71,6 +97,22 @@ class MyTrain:
 
                 return log_name
 
+            def __init_save_dir__():
+                if op.NUM_HIDDEN_LAYER < 10:
+                    _hidden_ = "_h_0" + str(op.NUM_HIDDEN_LAYER)
+                else:
+                    _hidden_ = "_h_" + str(op.NUM_HIDDEN_LAYER)
+
+                _epoch_ = "_ep_" + str(op.EPOCH) + "_"
+                _save_dir = tensor_save + _hidden_ + _epoch_ + str(k_fold + 1) + "/"
+
+                if os.path.isdir(_save_dir):
+                    shutil.rmtree(_save_dir)
+                os.mkdir(_save_dir)
+
+                return _save_dir
+
+            save_dir = __init_save_dir__()
             num_input_node = len(x_train[0])
 
             if NUM_HIDDEN_DIMENSION:
@@ -78,30 +120,29 @@ class MyTrain:
             else:
                 num_hidden_node = len(x_train[0])
 
-            tf_x = tf.placeholder(dtype=tf.float32, shape=[None, num_input_node])
-            tf_y = tf.placeholder(dtype=tf.float32, shape=[None, 1])
+            tf_x = tf.placeholder(dtype=tf.float32, shape=[None, num_input_node], name=NAME_X)
+            tf_y = tf.placeholder(dtype=tf.float32, shape=[None, 1], name=NAME_Y)
 
             tf_weight = list()
             tf_bias = list()
             tf_layer = [tf_x]
 
             for i in range(op.NUM_HIDDEN_LAYER):
-                if i == 0:
-                    tf_weight.append(tf.get_variable("h_weight_" + str(i+1), dtype=tf.float32,
-                                                     shape=[num_input_node, num_hidden_node],
-                                                     initializer=tf.contrib.layers.xavier_initializer()))
-                else:
-                    tf_weight.append(tf.get_variable("h_weight_" + str(i+1), dtype=tf.float32,
-                                                     shape=[num_hidden_node, num_hidden_node],
-                                                     initializer=tf.contrib.layers.xavier_initializer()))
-                tf_bias.append(tf.Variable(tf.random_normal([num_hidden_node]), name="h_bias_" + str(i+1)))
+                num_hidden_node = int(num_input_node / RATIO_HIDDEN)
+
+                tf_weight.append(tf.get_variable("h_weight_" + str(i + 1), dtype=tf.float32,
+                                                 shape=[num_input_node, num_hidden_node],
+                                                 initializer=tf.contrib.layers.xavier_initializer()))
+                tf_bias.append(tf.Variable(tf.random_normal([num_hidden_node]), name="h_bias_" + str(i + 1)))
                 tf_layer.append(tf.nn.relu(tf.matmul(tf_layer[i], tf_weight[i]) + tf_bias[i]))
+
+                num_input_node = int(num_input_node / RATIO_HIDDEN)
 
             tf_weight.append(tf.get_variable("o_weight", dtype=tf.float32, shape=[num_hidden_node, 1],
                                              initializer=tf.contrib.layers.xavier_initializer()))
             tf_bias.append(tf.Variable(tf.random_normal([1]), name="o_bias"))
 
-            hypothesis = tf.sigmoid(tf.matmul(tf_layer[-1], tf_weight[-1]) + tf_bias[-1])
+            hypothesis = tf.sigmoid(tf.matmul(tf_layer[-1], tf_weight[-1]) + tf_bias[-1], name=NAME_HYPO)
 
             with tf.name_scope("cost"):
                 cost = -tf.reduce_mean(tf_y * tf.log(hypothesis) + (1 - tf_y) * tf.log(1 - hypothesis))
@@ -110,9 +151,11 @@ class MyTrain:
             train = tf.train.GradientDescentOptimizer(learning_rate=0.01).minimize(cost)
 
             # cut off
-            predict = tf.cast(hypothesis > 0.5, dtype=tf.float32)
+            predict = tf.cast(hypothesis > 0.5, dtype=tf.float32, name=NAME_PREDICT)
             _accuracy = tf.reduce_mean(tf.cast(tf.equal(predict, tf_y), dtype=tf.float32))
             accuracy_summ = tf.summary.scalar("accuracy", _accuracy)
+
+            saver = tf.train.Saver()
 
             with tf.Session() as sess:
                 merged_summary = tf.summary.merge_all()
@@ -133,69 +176,46 @@ class MyTrain:
 
                 h, p, a = sess.run([hypothesis, predict, _accuracy], feed_dict={tf_x: x_test, tf_y: y_test})
 
+                saver.save(sess, save_dir + "model", global_step=op.EPOCH)
+
             tf.reset_default_graph()
 
             _precision = precision_score(y_test, p)
             _recall = recall_score(y_test, p)
-
-            if op.DO_SHOW:
-                print('\n\nlogistic regression')
-                print('Precision : %.2f' % (_precision*100))
-                print('Recall : %.2f' % (_recall*100))
-                print('Accuracy : %.2f' % (a*100))
+            _f1 = f1_score(y_test, p)
+            _logistic_fpr, _logistic_tpr, _ = roc_curve(y_test, h)
+            _auc = auc(_logistic_fpr, _logistic_tpr)
 
             if _precision == 0 or _recall == 0:
-                print('k-fold : %d, Precision : %.2f, Recall : %.2f' % (k_fold, (_precision*100), (_recall*100)))
+                print('k-fold : %d, Precision : %.2f, Recall : %.2f' % (k_fold, (_precision * 100), (_recall * 100)))
 
-            __append_score__(accuracy["logistic_regression"], a)
-            __append_score__(precision["logistic_regression"], _precision)
-            __append_score__(recall["logistic_regression"], _recall)
+            self.__append_score__(accuracy["logistic_regression"], a)
+            self.__append_score__(precision["logistic_regression"], _precision)
+            self.__append_score__(recall["logistic_regression"], _recall)
+            self.__append_score__(f1["logistic_regression"], _f1)
+            self.__append_score__(roc_auc["logistic_regression"], _auc)
 
-            return h
-
-        def __set_plt__():
-            logistic_fpr, logistic_tpr, _ = roc_curve(y_test, logistic_probas_)
-            roc_auc = auc(logistic_fpr, logistic_tpr)
-            logistic_plot.plot(logistic_fpr, logistic_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % roc_auc)
-            svm_fpr, svm_tpr, _ = roc_curve(y_test_np, svm_probas_[:, 1])
-            roc_auc = auc(svm_fpr, svm_tpr)
-            svm_plot.plot(svm_fpr, svm_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % roc_auc)
+            if op.DO_SHOW:
+                print('\n\n')
+                print(k_fold + 1, "fold", 'logistic regression')
+                print('Precision : %.2f' % (_precision * 100))
+                print('Recall    : %.2f' % (_recall * 100))
+                print('F1-Score  : %.2f' % (_f1 * 100))
+                print('Accuracy  : %.2f' % (a * 100))
+                print('AUC       : %.2f' % (_auc * 100))
+                logistic_plot.plot(_logistic_fpr, _logistic_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % _auc)
 
         def __show_plt__():
             logistic_plot.legend(loc="lower right")
             svm_plot.legend(loc="lower right")
             plt.show()
-
-        def __show_score__():
-            p_score = float()
-            r_score = float()
-            a_score = float()
-            auc_score = float()
-
-            for p in precision["logistic_regression"]:
-                p_score += p
-            for r in recall["logistic_regression"]:
-                r_score += r
-            for a in accuracy["logistic_regression"]:
-                a_score += a
-            for u in roc_auc["logistic_regression"]:
-                auc_score += u
-
-            print("\n\n======================================\n")
-            print("Total precision - %.2f" % ((p_score / self.num_fold)*100))
-            print("Total recall -  %.2f" % ((r_score / self.num_fold)*100))
-            print("Total accuracy -  %.2f" % ((a_score / self.num_fold)*100))
-            print("Total auc -  %.2f" % ((auc_score / self.num_fold)*100))
-            print("\n\n======================================\n")
-
-        def __append_score__(_score_list, _score):
-            _score_list.append(_score)
-
+            
         start_time = time.time()
         accuracy = {"logistic_regression": list(), "svm": list()}
         precision = {"logistic_regression": list(), "svm": list()}
         recall = {"logistic_regression": list(), "svm": list()}
         roc_auc = {"logistic_regression": list(), "svm": list()}
+        f1 = {"logistic_regression": list(), "svm": list()}
 
         if do_show:
             fig = plt.figure(figsize=(10, 6))
@@ -224,13 +244,8 @@ class MyTrain:
             if do_show:
                 __show_shape__()
 
-            logistic_probas_ = __logistic_regression__()
-            logistic_fpr, logistic_tpr, _ = roc_curve(y_test, logistic_probas_)
-            __append_score__(roc_auc["logistic_regression"], auc(logistic_fpr, logistic_tpr))
-            # svm_probas_ = __train_svm__()
-
-            if do_show:
-                __set_plt__()
+            __logistic_regression__()
+            __train_svm__()
 
         print("\n\n processing time     --- %s seconds ---" % (time.time() - start_time))
         print("\n\n")
@@ -238,24 +253,109 @@ class MyTrain:
         if do_show:
             __show_plt__()
 
-        __show_score__()
+        self.__show_score__("logistic_regression", precision, recall, f1, accuracy, roc_auc)
+        self.__show_score__("svm", precision, recall, f1, accuracy, roc_auc)
+
+    def __show_score__(self, _key, _precision, _recall, _f1, _accuracy, _roc_auc):
+        p_score = float()
+        r_score = float()
+        f_score = float()
+        a_score = float()
+        auc_score = float()
+
+        for p in _precision[_key]:
+            p_score += p
+        for r in _recall[_key]:
+            r_score += r
+        for f in _f1[_key]:
+            f_score += f
+        for a in _accuracy[_key]:
+            a_score += a
+        for u in _roc_auc[_key]:
+            auc_score += u
+
+        print("\n\n============" + _key + "============\n")
+        print("Total precision - %.2f" % ((p_score / self.num_fold) * 100))
+        print("Total recall -  %.2f" % ((r_score / self.num_fold) * 100))
+        print("Total F1-Score -  %.2f" % ((f_score / self.num_fold) * 100))
+        print("Total accuracy -  %.2f" % ((a_score / self.num_fold) * 100))
+        print("Total auc -  %.2f" % ((auc_score / self.num_fold) * 100))
+        print("\n\n======================================\n")
+
+    def test(self, tensor_load=""):
+        def __load__():
+            if op.NUM_HIDDEN_LAYER < 10:
+                _hidden_ = "_h_0" + str(op.NUM_HIDDEN_LAYER)
+            else:
+                _hidden_ = "_h_" + str(op.NUM_HIDDEN_LAYER)
+
+            _epoch_ = "_ep_" + str(op.EPOCH) + "_"
+            _tensor_load = tensor_load + _hidden_ + _epoch_ + str(k_fold + 1) + "/"
+
+            sess = tf.Session()
+            saver = tf.train.import_meta_graph(_tensor_load + 'model-' + str(op.EPOCH) + '.meta')
+            saver.restore(sess, tf.train.latest_checkpoint(_tensor_load))
+            graph = tf.get_default_graph()
+            tf_x = graph.get_tensor_by_name(NAME_X + ":0")
+            tf_y = graph.get_tensor_by_name(NAME_Y + ":0")
+            hypothesis = graph.get_tensor_by_name(NAME_HYPO + ":0")
+            predict = graph.get_tensor_by_name(NAME_PREDICT + ":0")
+            
+            h, p = sess.run([hypothesis, predict], feed_dict={tf_x: x_test, tf_y: y_test})
+
+            _precision = precision_score(y_test, p)
+            _recall = recall_score(y_test, p)
+            _f1 = f1_score(y_test, p)
+            _accuracy = accuracy_score(y_test, p)
+
+            print('Precision : %.2f' % (_precision * 100))
+            print('Recall : %.2f' % (_recall * 100))
+            print('F1-Score : %.2f' % (_f1 * 100))
+            print('Accuracy : %.2f' % (_accuracy * 100))
+
+            self.__append_score__(accuracy["logistic_regression"], _accuracy)
+            self.__append_score__(precision["logistic_regression"], _precision)
+            self.__append_score__(recall["logistic_regression"], _recall)
+            self.__append_score__(f1["logistic_regression"], _f1)
+            logistic_fpr, logistic_tpr, _ = roc_curve(y_test, h)
+            self.__append_score__(roc_auc["logistic_regression"], auc(logistic_fpr, logistic_tpr))
+            
+        accuracy = {"logistic_regression": list(), "svm": list()}
+        precision = {"logistic_regression": list(), "svm": list()}
+        recall = {"logistic_regression": list(), "svm": list()}
+        roc_auc = {"logistic_regression": list(), "svm": list()}
+        f1 = {"logistic_regression": list(), "svm": list()}
+        
+        for k_fold in range(self.num_fold):
+            x_test = self.vector_list[k_fold]["x_test"]["merge"]
+            y_test = self.vector_list[k_fold]["y_test"]
+
+            __load__()
+
+        self.__show_score__("logistic_regression", precision, recall, f1, accuracy, roc_auc)
 
     def vector2txt(self, _file_name):
         def __vector2txt__():
             def __write_vector__(_w_file):
                 for dimension, v in enumerate(x):
                     if v != 0:
-                        _w_file.write(str(dimension) + ":" + str(v) + token)
+                        _w_file.write(str(dimension + 1) + ":" + str(v) + token)
                 _w_file.write("\n")
 
             with open("make/" + train_file_name + "_" + str(k_fold + 1) + ".txt", 'w') as train_file:
                 for x, y in zip(x_train, y_train):
-                    train_file.write(str(y[0]) + token)
+                    if y[0] == 1:
+                        train_file.write(str(1) + token)
+                    else:
+                        train_file.write(str(-1) + token)
                     __write_vector__(train_file)
 
             with open("make/" + test_file_name + "_" + str(k_fold + 1) + ".txt", 'w') as test_file:
                 for x, y in zip(x_test, y_test):
-                    test_file.write(str(y[0]) + token)
+                    if y[0] == 1:
+                        test_file.write(str(1) + token)
+                    else:
+                        test_file.write(str(-1) + token)
                     __write_vector__(test_file)
 
         token = " "

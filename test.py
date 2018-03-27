@@ -37,4 +37,5 @@ if __name__ == '__main__':
         op.show_options()
 
         train = MyTrain(vector_list, op.IS_CLOSED)
-        train.training(do_show=op.DO_SHOW, tensor_save=TENSOR_PATH + file_name)
+        train.test(tensor_load=TENSOR_PATH + file_name)
+
