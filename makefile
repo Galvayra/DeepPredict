@@ -3,7 +3,7 @@ clean:
 	rm -r */__pycache__
 
 clean-log:
-	rm -r logs
+	rm -r logs/*
 
 clean-save:
 	rm -rf modeling/save/*
