@@ -6,10 +6,16 @@ from .variables import *
 
 # ### refer to reference file ###
 class DataHandler:
-    def __init__(self):
+    def __init__(self, is_reverse=False):
         file_name = DATA_PATH + DATA_FILE
+        self.is_reverse = is_reverse
         self.rows_data = pd.read_csv(file_name)
+
         print("Read csv file -", file_name, "\n\n")
+
+        if self.is_reverse:
+            print("make reverse y labels!\n\n")
+
         self.file_name = DATA_FILE
         self.head_dict = {self.__get_head_dict_key__(i): v for i, v in enumerate(self.rows_data)}
         self.erase_index_list = self.__set_erase_index_list__()
@@ -147,12 +153,20 @@ class DataHandler:
 
         header_key = self.head_dict["DC"]
 
-        for i, value in enumerate(self.rows_data[header_key]):
-            if i not in self.erase_index_list:
-                if value == "사망":
-                    y_labels.append([1])
-                else:
-                    y_labels.append([0])
+        if self.is_reverse:
+            for i, value in enumerate(self.rows_data[header_key]):
+                if i not in self.erase_index_list:
+                    if value == "사망":
+                        y_labels.append([0])
+                    else:
+                        y_labels.append([1])
+        else:
+            for i, value in enumerate(self.rows_data[header_key]):
+                if i not in self.erase_index_list:
+                    if value == "사망":
+                        y_labels.append([1])
+                    else:
+                        y_labels.append([0])
 
         return y_labels
 

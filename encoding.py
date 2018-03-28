@@ -10,10 +10,14 @@ except ImportError:
 
 from DeepPredict.dataset.dataHandler import DataHandler
 from DeepPredict.modeling.vectorization import MyVector
+from DeepPredict.arguments import USE_ID
 
 
 if __name__ == '__main__':
-    myData = MyVector(DataHandler())
+    if USE_ID == "reverse#":
+        myData = MyVector(DataHandler(is_reverse=True))
+    else:
+        myData = MyVector(DataHandler())
     myData.encoding()
     myData.dump()
 

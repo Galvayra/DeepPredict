@@ -40,4 +40,4 @@ if __name__ == '__main__':
         op.show_options()
 
         train = MyTrain(vector_list)
-        train.training(tensor_save=TENSOR_PATH + op.USE_ID + file_name)
+        train.training(tensor_save=TENSOR_PATH + file_name)
