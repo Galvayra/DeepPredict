@@ -14,7 +14,7 @@ from DeepPredict.arguments import USE_ID
 
 
 if __name__ == '__main__':
-    if USE_ID == "reverse#":
+    if USE_ID.startswith("reverse#"):
         myData = MyVector(DataHandler(is_reverse=True))
     else:
         myData = MyVector(DataHandler())

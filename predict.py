@@ -30,7 +30,6 @@ if __name__ == '__main__':
     else:
         file_name = append_name + csv_name + "_opened_" + str(op.NUM_FOLDS)
 
-
     try:
         with open(DUMP_PATH + DUMP_FILE + "_" + file_name, 'r') as file:
             vector_list = json.load(file)

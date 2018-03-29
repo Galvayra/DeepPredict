@@ -336,8 +336,8 @@ class MyOneHotEncoder:
                 # normalization
                 else:
                     # print(_value, (_value - minimum + MIN_SCALING)/(division + MIN_SCALING))
-                    # _value = (_value - minimum + MIN_SCALING)/(division + MIN_SCALING)
-                    _value = (_value - minimum) / division
+                    _value = (_value - minimum + MIN_SCALING)/(division + MIN_SCALING)
+                    # _value = (_value - minimum) / division
 
                 x_vector_dict["merge"][_i].append(_value)
                 x_vector_dict[columns_key][_i].append(_value)
