@@ -324,17 +324,20 @@ class MyOneHotEncoder:
 
         def __make_vector_use_scalar__():
             value_list = self.__set_scalar_value_list__(k, v)
+
             for _i, _value in enumerate(value_list):
                 # type is float
                 if math.isnan(_value):
                     _value = float(0)
                 elif _value < minimum:
-                    _value = float(MIN_SCALING)
+                    _value = float(0)
                 elif _value > maximum:
                     _value = float(1)
                 # normalization
                 else:
-                    _value = (_value - minimum + MIN_SCALING)/(division + MIN_SCALING)
+                    # print(_value, (_value - minimum + MIN_SCALING)/(division + MIN_SCALING))
+                    # _value = (_value - minimum + MIN_SCALING)/(division + MIN_SCALING)
+                    _value = (_value - minimum) / division
 
                 x_vector_dict["merge"][_i].append(_value)
                 x_vector_dict[columns_key][_i].append(_value)
