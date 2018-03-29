@@ -407,7 +407,8 @@ class MyOneHotEncoder:
 
         x_vector_dict = __init_x_vector_dict__()
 
-        for k, v in data_dict.items():
+        for k in sorted(data_dict.keys()):
+            v = data_dict[k]
             for columns_key, columns in columns_dict.items():
                 for columns_type_key in columns:
                     if columns_type_key == "scalar":

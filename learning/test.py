@@ -97,7 +97,7 @@ class MyTest:
             fig = plt.figure(figsize=(10, 6))
             fig.suptitle("ROC CURVE", fontsize=16)
             logistic_plot = plt.subplot2grid((2, 2), (0, 0))
-            logistic_plot.set_title("Logistic regression")
+            logistic_plot.set_title("Feed Forward Neural Network")
 
             logistic_plot.set_ylabel("TPR (sensitivity)")
             logistic_plot.set_xlabel("1 - specificity")

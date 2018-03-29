@@ -36,9 +36,9 @@ blood_count_columns = {
 
 blood_chemistry_columns = {
     "scalar": {
-        "0": ['AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV', 'AW', 'AX', 'AY', 'AZ',
-              'BA', 'BB', 'BC', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI',
-              'BJ', 'BK', 'BL', 'BN', 'BO', 'BP', 'BQ', 'BR', 'BS']
+        "0": ['AO', 'AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV', 'AW', 'AX', 'AY', 'AZ',
+              'BA', 'BB', 'BC', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BK', 'BL', 'BM', 'BN', 'BO', 'BP',
+              'BQ', 'BR', 'BS']
     },
     "class": ['BT', 'BU', 'BV']
 }
