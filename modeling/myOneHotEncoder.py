@@ -421,13 +421,13 @@ class MyOneHotEncoder:
                     elif columns_type_key == "class" or columns_type_key == "word":
                         if k in columns[columns_type_key]:
                             encode_dict = self.vector_dict[k]
-                            class_list = encode_dict.keys()
+                            class_list = sorted(encode_dict.keys())
                             for i, value in enumerate(v):
                                 __make_vector_use_class__()
                     elif columns_type_key == "symptom":
                         if k in columns[columns_type_key]:
                             encode_dict = self.vector_dict[k]
-                            class_list = encode_dict.keys()
+                            class_list = sorted(encode_dict.keys())
                             for i, value in enumerate(v):
                                 __make_vector_use_word__()
 
