@@ -15,7 +15,7 @@ class MyTrain:
     def __init__(self, vector_list):
         self.vector_list = vector_list
 
-    def training(self, tensor_save=""):
+    def training(self):
         def __show_shape__():
             def __count_mortality__(_y_data_):
                 _count = 0
@@ -109,12 +109,12 @@ class MyTrain:
 
             def __init_save_dir__():
                 if op.NUM_HIDDEN_LAYER < 10:
-                    _hidden_ = "_h_0" + str(op.NUM_HIDDEN_LAYER)
+                    _hidden_ = "h_0" + str(op.NUM_HIDDEN_LAYER)
                 else:
-                    _hidden_ = "_h_" + str(op.NUM_HIDDEN_LAYER)
+                    _hidden_ = "h_" + str(op.NUM_HIDDEN_LAYER)
 
                 _epoch_ = "_ep_" + str(op.EPOCH) + "_"
-                _save_dir = tensor_save + _hidden_ + _epoch_ + str(k_fold + 1) + "/"
+                _save_dir = TENSOR_PATH + _hidden_ + _epoch_ + str(k_fold + 1) + "/"
 
                 if os.path.isdir(_save_dir):
                     shutil.rmtree(_save_dir)
@@ -233,12 +233,12 @@ class MyTrain:
 
             def __init_save_dir__():
                 if op.NUM_HIDDEN_LAYER < 10:
-                    _hidden_ = "_h_0" + str(op.NUM_HIDDEN_LAYER)
+                    _hidden_ = "h_0" + str(op.NUM_HIDDEN_LAYER)
                 else:
-                    _hidden_ = "_h_" + str(op.NUM_HIDDEN_LAYER)
+                    _hidden_ = "h_" + str(op.NUM_HIDDEN_LAYER)
 
                 _epoch_ = "_ep_" + str(op.EPOCH) + "_"
-                _save_dir = tensor_save + _hidden_ + _epoch_ + str(k_fold + 1) + "/"
+                _save_dir = TENSOR_PATH + _hidden_ + _epoch_ + str(k_fold + 1) + "/"
 
                 if os.path.isdir(_save_dir):
                     shutil.rmtree(_save_dir)

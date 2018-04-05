@@ -9,7 +9,7 @@ except ImportError:
     sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 from DeepPredict.dataset.variables import DATA_FILE
-from DeepPredict.modeling.variables import DUMP_PATH, DUMP_FILE, TENSOR_PATH
+from DeepPredict.modeling.variables import DUMP_PATH, DUMP_FILE
 from DeepPredict.learning.train import MyTrain
 import DeepPredict.arguments as op
 
@@ -44,4 +44,4 @@ if __name__ == '__main__':
         op.show_options()
 
         train = MyTrain(vector_list)
-        train.training(tensor_save=TENSOR_PATH + file_name)
+        train.training()

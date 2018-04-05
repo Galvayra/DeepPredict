@@ -3,15 +3,14 @@ import matplotlib.pyplot as plt
 import DeepPredict.arguments as op
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import roc_curve, auc
-from .variables import NAME_Y, NAME_X, NAME_HYPO, NAME_PREDICT
-
+from .variables import NAME_Y, NAME_X, NAME_HYPO, NAME_PREDICT, TENSOR_PATH
 
 
 class MyTest:
     def __init__(self, vector_list):
         self.vector_list = vector_list
 
-    def predict(self, tensor_load=""):
+    def predict(self):
         def __show_score__(_key):
             p_score = float()
             r_score = float()
@@ -47,16 +46,24 @@ class MyTest:
 
         def __load__():
             if op.NUM_HIDDEN_LAYER < 10:
-                _hidden_ = "_h_0" + str(op.NUM_HIDDEN_LAYER)
+                _hidden_ = "h_0" + str(op.NUM_HIDDEN_LAYER)
             else:
-                _hidden_ = "_h_" + str(op.NUM_HIDDEN_LAYER)
+                _hidden_ = "h_" + str(op.NUM_HIDDEN_LAYER)
 
             _epoch_ = "_ep_" + str(op.EPOCH) + "_"
-            _tensor_load = tensor_load + _hidden_ + _epoch_ + str(k_fold + 1) + "/"
+
+            if op.USE_ID:
+                _tensor_load = TENSOR_PATH + op.USE_ID.split('#')[0] + "_"
+            else:
+                _tensor_load = TENSOR_PATH
+
+            _tensor_load += _hidden_ + _epoch_ + str(k_fold + 1) + "/"
 
             sess = tf.Session()
             saver = tf.train.import_meta_graph(_tensor_load + 'model-' + str(op.EPOCH) + '.meta')
             saver.restore(sess, tf.train.latest_checkpoint(_tensor_load))
+
+            print("\n\n\nRead Neural Network -", _tensor_load, "\n")
             graph = tf.get_default_graph()
             tf_x = graph.get_tensor_by_name(NAME_X + ":0")
             tf_y = graph.get_tensor_by_name(NAME_Y + ":0")
