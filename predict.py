@@ -17,7 +17,7 @@ import DeepPredict.arguments as op
 if __name__ == '__main__':
     csv_name = DATA_FILE.split('.')[0]
 
-    file_name = op.FILE_VECTOR
+    file_name = DUMP_PATH + DUMP_FILE + op.FILE_VECTOR
 
     try:
         with open(DUMP_PATH + DUMP_FILE + "_" + file_name, 'r') as file:
