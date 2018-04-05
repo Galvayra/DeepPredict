@@ -448,8 +448,8 @@ class MyTrain:
             if op.DO_SVM:
                 __train_svm__()
             else:
-                __back_propagation__()
-                # __logistic_regression__()
+                # __back_propagation__()
+                __logistic_regression__()
 
         print("\n\n processing time     --- %s seconds ---" % (time.time() - start_time))
         print("\n\n")

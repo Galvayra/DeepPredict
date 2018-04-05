@@ -49,18 +49,18 @@ class MyVector:
         my_encoder = MyOneHotEncoder(w2v=op.USE_W2V)
         my_encoder.encoding(x_data_dict)
 
-        # fit encoder into data
-        if op.IS_CLOSED:
-            y_train = y_data
-            y_test = y_data
-            x_train = my_encoder.fit(__set_x_data_dict__(), len(y_train))
-            x_test = my_encoder.fit(__set_x_data_dict__(is_test=True), len(y_test))
-            self.vector_list.append(__init_vector_dict__())
-        else:
-            # k-fold validation
-            if op.NUM_FOLDS > 1:
-                subset_size = int(len(y_data) / op.NUM_FOLDS) + 1
+        # k-fold validation
+        if op.NUM_FOLDS > 1:
+            subset_size = int(len(y_data) / op.NUM_FOLDS) + 1
 
+            if op.IS_CLOSED:
+                for i in range(op.NUM_FOLDS):
+                    y_train = y_data[:i * subset_size] + y_data[(i + 1) * subset_size:]
+                    y_test = y_data[:i * subset_size] + y_data[(i + 1) * subset_size:]
+                    x_train = my_encoder.fit(__set_x_data_dict__(), len(y_train))
+                    x_test = my_encoder.fit(__set_x_data_dict__(), len(y_test))
+                    self.vector_list.append(__init_vector_dict__())
+            else:
                 for i in range(op.NUM_FOLDS):
                     y_train = y_data[:i * subset_size] + y_data[(i + 1) * subset_size:]
                     y_test = y_data[i * subset_size:][:subset_size]
@@ -68,15 +68,15 @@ class MyVector:
                     x_test = my_encoder.fit(__set_x_data_dict__(is_test=True), len(y_test))
                     self.vector_list.append(__init_vector_dict__())
 
-            # one fold
-            else:
-                subset_size = int(len(y_data) / op.RATIO)
+        # one fold
+        else:
+            subset_size = int(len(y_data) / op.RATIO)
 
-                y_train = y_data[subset_size:]
-                y_test = y_data[:subset_size]
-                x_train = my_encoder.fit(__set_x_data_dict__(), len(y_train))
-                x_test = my_encoder.fit(__set_x_data_dict__(is_test=True), len(y_test))
-                self.vector_list.append(__init_vector_dict__())
+            y_train = y_data[subset_size:]
+            y_test = y_data[:subset_size]
+            x_train = my_encoder.fit(__set_x_data_dict__(is_manual=True), len(y_train))
+            x_test = my_encoder.fit(__set_x_data_dict__(is_manual=True, is_test=True), len(y_test))
+            self.vector_list.append(__init_vector_dict__())
 
         del self.my_data
 
@@ -90,18 +90,21 @@ class MyVector:
 
             return count
 
-        if op.USE_W2V:
-            append_name = "_w2v_"
+        if op.FILE_VECTOR:
+            file_name = op.FILE_VECTOR
         else:
-            append_name = "_"
+            if op.USE_W2V:
+                append_name = "_w2v_"
+            else:
+                append_name = "_"
 
-        if op.USE_ID:
-            append_name += op.USE_ID
+            if op.USE_ID:
+                append_name += op.USE_ID
 
-        if op.IS_CLOSED:
-            file_name = DUMP_PATH + DUMP_FILE + append_name + self.file_name + "_closed"
-        else:
-            file_name = DUMP_PATH + DUMP_FILE + append_name + self.file_name + "_opened_" + str(op.NUM_FOLDS)
+            if op.IS_CLOSED:
+                append_name += "closed_"
+
+            file_name = DUMP_PATH + DUMP_FILE + append_name + self.file_name + "_" + str(op.NUM_FOLDS)
 
         with open(file_name, 'w') as outfile:
             json.dump(self.vector_list, outfile, indent=4)

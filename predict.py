@@ -17,28 +17,34 @@ import DeepPredict.arguments as op
 if __name__ == '__main__':
     csv_name = DATA_FILE.split('.')[0]
 
-    if op.USE_W2V:
-        append_name = "w2v_"
-    else:
-        append_name = ""
-
-    if op.USE_ID:
-        append_name += op.USE_ID
-
-    if op.IS_CLOSED:
-        file_name = append_name + csv_name + "_closed"
-    else:
-        file_name = append_name + csv_name + "_opened_" + str(op.NUM_FOLDS)
+    file_name = op.FILE_VECTOR
 
     try:
         with open(DUMP_PATH + DUMP_FILE + "_" + file_name, 'r') as file:
             vector_list = json.load(file)
     except FileNotFoundError:
-        print("\nPlease execute encoding script !")
-        print("make sure whether vector file is existed in", DUMP_PATH, "directory")
-    else:
-        print("\nRead vectors -", file_name)
-        op.show_options()
+        if op.USE_W2V:
+            append_name = "w2v_"
+        else:
+            append_name = ""
 
-        test = MyTest(vector_list)
-        test.predict(tensor_load=TENSOR_PATH + file_name)
+        if op.USE_ID:
+            append_name += op.USE_ID
+
+        if op.IS_CLOSED:
+            append_name += "closed_"
+
+        file_name = append_name + csv_name + "_" + str(op.NUM_FOLDS)
+
+        try:
+            with open(DUMP_PATH + DUMP_FILE + "_" + file_name, 'r') as file:
+                vector_list = json.load(file)
+        except FileNotFoundError:
+            print("\nPlease execute encoding script !")
+            print("make sure whether vector file is existed in", DUMP_PATH, "directory")
+
+    print("\nRead vectors -", file_name)
+    op.show_options()
+
+    test = MyTest(vector_list)
+    test.predict(tensor_load=TENSOR_PATH + file_name)
