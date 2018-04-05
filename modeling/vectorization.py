@@ -91,7 +91,7 @@ class MyVector:
             return count
 
         if op.FILE_VECTOR:
-            file_name = DUMP_PATH + DUMP_FILE + op.FILE_VECTOR
+            file_name = DUMP_PATH +  op.FILE_VECTOR
         else:
             if op.USE_W2V:
                 append_name = "_w2v_"

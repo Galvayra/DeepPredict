@@ -31,10 +31,10 @@ if __name__ == '__main__':
         if op.IS_CLOSED:
             append_name += "closed_"
 
-        file_name = append_name + csv_name + "_" + str(op.NUM_FOLDS)
+        file_name = DUMP_FILE + "_" + append_name + csv_name + "_" + str(op.NUM_FOLDS)
 
     try:
-        with open(DUMP_PATH + DUMP_FILE + "_" + file_name, 'r') as file:
+        with open(DUMP_PATH + file_name, 'r') as file:
             vector_list = json.load(file)
     except FileNotFoundError:
         print("\nPlease execute encoding script !")
