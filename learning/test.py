@@ -86,7 +86,8 @@ class MyTest:
                 print('F1-Score  : %.2f' % (_f1 * 100))
                 print('Accuracy  : %.2f' % (_accuracy * 100))
                 print('AUC       : %.2f' % (_auc * 100))
-                logistic_plot.plot(logistic_fpr, logistic_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % _auc)
+                logistic_plot.plot(logistic_fpr, logistic_tpr, alpha=0.3, label='ROC fold %d (AUC = %0.2f)' % (k_fold+1,
+                                                                                                               _auc))
 
             __append_score__(accuracy["logistic_regression"], _accuracy)
             __append_score__(precision["logistic_regression"], _precision)
