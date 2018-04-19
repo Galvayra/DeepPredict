@@ -404,6 +404,130 @@ class MyTrain:
             #     print('AUC       : %.2f' % (_auc * 100))
             #     plot.plot(_logistic_fpr, _logistic_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % _auc)
 
+        def __back_propagation2__():
+            def __init_log_file_name__(_k_fold):
+                log_name = "./logs/" + op.USE_ID + "log_"
+
+                if op.NUM_HIDDEN_LAYER < 10:
+                    log_name += "h_0" + str(op.NUM_HIDDEN_LAYER)
+                else:
+                    log_name += "h_" + str(op.NUM_HIDDEN_LAYER)
+
+                log_name += "_ep_" + str(op.EPOCH) + "_k_" + str(_k_fold + 1)
+
+                if op.USE_W2V:
+                    log_name += "_w2v"
+
+                return log_name
+
+            def __init_save_dir__():
+                if op.NUM_HIDDEN_LAYER < 10:
+                    _hidden_ = "h_0" + str(op.NUM_HIDDEN_LAYER)
+                else:
+                    _hidden_ = "h_" + str(op.NUM_HIDDEN_LAYER)
+
+                _epoch_ = "_ep_" + str(op.EPOCH) + "_"
+                _save_dir = TENSOR_PATH + _hidden_ + _epoch_ + str(k_fold + 1) + "/"
+
+                if os.path.isdir(_save_dir):
+                    shutil.rmtree(_save_dir)
+                os.mkdir(_save_dir)
+
+                return _save_dir
+
+            def __sigma__(x):
+                return tf.div(tf.constant(1.0),
+                              tf.add(tf.constant(1.0), tf.exp(tf.negative(x))))
+
+            def __sigmaprime__(x):
+                return tf.multiply(__sigma__(x), tf.subtract(tf.constant(1.0), __sigma__(x)))
+
+            save_dir = __init_save_dir__()
+            num_input_node = len(x_train[0])
+
+            if NUM_HIDDEN_DIMENSION:
+                num_hidden_node = NUM_HIDDEN_DIMENSION
+            else:
+                num_hidden_node = len(x_train[0])
+
+            tf_x = tf.placeholder(dtype=tf.float32, shape=[None, num_input_node], name=NAME_X)
+            tf_y = tf.placeholder(dtype=tf.float32, shape=[None, 1], name=NAME_Y)
+
+            tf_weight = tf.Variable(tf.get_variable(shape=[num_input_node, 1], name="h_weight", dtype=tf.float32))
+            tf_bias = tf.Variable(tf.random_normal([1]), name="o_bias")
+
+            y_pred = tf.sigmoid(tf.matmul(tf_x, tf_weight) + tf_bias)
+
+            print(tf_x.get_shape())
+            print(tf_y.get_shape())
+            print(tf_weight.get_shape())
+            print(tf_bias.get_shape())
+            print(y_pred.get_shape())
+            print("\n\n\n")
+
+            tf.reset_default_graph()
+
+            # with tf.name_scope("cost"):
+            #     cost = -tf.reduce_mean(tf_y * tf.log(hypothesis) + (1 - tf_y) * tf.log(1 - hypothesis))
+            #     cost_summ = tf.summary.scalar("cost", cost)
+            #
+            # train = tf.train.GradientDescentOptimizer(learning_rate=0.01).minimize(cost)
+            #
+            # # cut off
+            # predict = tf.cast(hypothesis > 0.5, dtype=tf.float32, name=NAME_PREDICT)
+            # _accuracy = tf.reduce_mean(tf.cast(tf.equal(predict, tf_y), dtype=tf.float32))
+            # accuracy_summ = tf.summary.scalar("accuracy", _accuracy)
+            #
+            # saver = tf.train.Saver()
+            #
+            # with tf.Session() as sess:
+            #     merged_summary = tf.summary.merge_all()
+            #     writer = tf.summary.FileWriter(__init_log_file_name__(k_fold))
+            #     writer.add_graph(sess.graph)  # Show the graph
+            #
+            #     sess.run(tf.global_variables_initializer())
+            #     sess.run(tf.local_variables_initializer())
+            #
+            #     # if self.is_closed:
+            #     for step in range(op.EPOCH + 1):
+            #         summary, cost_val, _ = sess.run([merged_summary, cost, train],
+            #                                         feed_dict={tf_x: x_train, tf_y: y_train})
+            #         writer.add_summary(summary, global_step=step)
+            #
+            #         if op.DO_SHOW and step % (op.EPOCH / 10) == 0:
+            #             print(str(step).rjust(5), cost_val)
+            #
+            #     h, p, a = sess.run([hypothesis, predict, _accuracy], feed_dict={tf_x: x_test, tf_y: y_test})
+            #
+            #     saver.save(sess, save_dir + "model", global_step=op.EPOCH)
+            #
+            # tf.reset_default_graph()
+            #
+            # _precision = precision_score(y_test, p)
+            # _recall = recall_score(y_test, p)
+            # _f1 = f1_score(y_test, p)
+            # _logistic_fpr, _logistic_tpr, _ = roc_curve(y_test, h)
+            # _auc = auc(_logistic_fpr, _logistic_tpr)
+            #
+            # if _precision == 0 or _recall == 0:
+            #     print('k-fold : %d, Precision : %.2f, Recall : %.2f' % (k_fold, (_precision * 100), (_recall * 100)))
+            #
+            # __append_score__(accuracy["back_propagation"], a)
+            # __append_score__(precision["back_propagation"], _precision)
+            # __append_score__(recall["back_propagation"], _recall)
+            # __append_score__(f1["back_propagation"], _f1)
+            # __append_score__(roc_auc["back_propagation"], _auc)
+            #
+            # if op.DO_SHOW:
+            #     print('\n\n')
+            #     print(k_fold + 1, "fold", 'back propagation')
+            #     print('Precision : %.2f' % (_precision * 100))
+            #     print('Recall    : %.2f' % (_recall * 100))
+            #     print('F1-Score  : %.2f' % (_f1 * 100))
+            #     print('Accuracy  : %.2f' % (a * 100))
+            #     print('AUC       : %.2f' % (_auc * 100))
+            #     plot.plot(_logistic_fpr, _logistic_tpr, alpha=0.3, label='ROC fold 1 (AUC = %0.2f)' % _auc)
+
         def __show_plt__():
             plot.legend(loc="lower right")
             plt.show()
@@ -448,8 +572,8 @@ class MyTrain:
             if op.DO_SVM:
                 __train_svm__()
             else:
-                # __back_propagation__()
-                __logistic_regression__()
+                __back_propagation2__()
+                # __logistic_regression__()
 
         print("\n\n processing time     --- %s seconds ---" % (time.time() - start_time))
         print("\n\n")
