@@ -1,3 +1,3 @@
 from . import *
 
-__all__ = ['test', 'train', 'variables', 'neuralnet']
+__all__ = ['train', 'variables', 'neuralNet']

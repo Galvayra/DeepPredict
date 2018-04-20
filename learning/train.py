@@ -5,7 +5,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import roc_curve, auc
 from .variables import *
-from .neuralnet import MyNeuralNetwork
+from .neuralNet import MyNeuralNetwork
 import time
 
 
