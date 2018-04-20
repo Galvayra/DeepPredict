@@ -111,7 +111,7 @@ class MyTrain(MyNeuralNetwork):
             if op.DO_SVM:
                 __train_svm__()
             else:
-                self.feed_forward_nn(x_train, y_train, x_test, y_test, k_fold, plot)
+                self.feed_forward_nn(k_fold, x_train, y_train, x_test, y_test, plot)
 
         print("\n\n processing time     --- %s seconds ---" % (time.time() - start_time))
         print("\n\n")
@@ -159,3 +159,45 @@ class MyTrain(MyNeuralNetwork):
             y_test = self.vector_list[k_fold]["y_test"]
 
             __vector2txt__()
+
+
+class MyPredict(MyNeuralNetwork):
+    def __init__(self, vector_list):
+        super().__init__()
+        self.vector_list = vector_list
+
+    def __show_score__(self, _method):
+        print("\n\n============ " + _method + " ============\n")
+        print("Total precision - %.2f" % ((self.score["P"] / op.NUM_FOLDS) * 100))
+        print("Total recall    -  %.2f" % ((self.score["R"] / op.NUM_FOLDS) * 100))
+        print("Total F1-Score  -  %.2f" % ((self.score["F1"] / op.NUM_FOLDS) * 100))
+        print("Total accuracy  -  %.2f" % ((self.score["Acc"] / op.NUM_FOLDS) * 100))
+        print("Total auc       -  %.2f" % ((self.score["AUC"] / op.NUM_FOLDS) * 100))
+        print("\n\n======================================\n")
+
+    def predict(self):
+        def __show_plt__():
+            plot.legend(loc="lower right")
+            plt.show()
+
+        plot = None
+
+        if op.DO_SHOW:
+            fig = plt.figure(figsize=(10, 6))
+            fig.suptitle("ROC CURVE", fontsize=16)
+            plot = plt.subplot2grid((2, 2), (0, 0))
+            plot.set_title("Feed Forward Neural Network")
+
+            plot.set_ylabel("TPR (sensitivity)")
+            plot.set_xlabel("1 - specificity")
+
+        for k_fold in range(op.NUM_FOLDS):
+            x_test = self.vector_list[k_fold]["x_test"]["merge"]
+            y_test = self.vector_list[k_fold]["y_test"]
+
+            self.load_feed_forward_nn(k_fold, x_test, y_test, plot)
+
+        self.__show_score__("Feed Forward NN")
+
+        if op.DO_SHOW:
+            __show_plt__()

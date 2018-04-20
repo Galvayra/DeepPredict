@@ -1,6 +1,6 @@
 import tensorflow as tf
 import DeepPredict.arguments as op
-from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import roc_curve, auc
 from .variables import *
 import os
@@ -17,38 +17,56 @@ class MyNeuralNetwork:
             "AUC": 0.0
         }
 
-    def feed_forward_nn(self, x_train, y_train, x_test, y_test, k_fold, plot):
-        def __init_log_file_name__(_k_fold):
-            log_name = "./logs/" + op.USE_ID + "log_"
+    def __init_log_file_name(self, k_fold):
+        log_name = "./logs/" + op.USE_ID + "log_"
 
-            if op.NUM_HIDDEN_LAYER < 10:
-                log_name += "h_0" + str(op.NUM_HIDDEN_LAYER)
-            else:
-                log_name += "h_" + str(op.NUM_HIDDEN_LAYER)
+        if op.NUM_HIDDEN_LAYER < 10:
+            log_name += "h_0" + str(op.NUM_HIDDEN_LAYER)
+        else:
+            log_name += "h_" + str(op.NUM_HIDDEN_LAYER)
 
-            log_name += "_ep_" + str(op.EPOCH) + "_k_" + str(_k_fold + 1)
+        log_name += "_ep_" + str(op.EPOCH) + "_k_" + str(k_fold + 1)
 
-            if op.USE_W2V:
-                log_name += "_w2v"
+        if op.USE_W2V:
+            log_name += "_w2v"
 
-            return log_name
+        return log_name
 
-        def __init_save_dir__():
-            if op.NUM_HIDDEN_LAYER < 10:
-                _hidden_ = "h_0" + str(op.NUM_HIDDEN_LAYER)
-            else:
-                _hidden_ = "h_" + str(op.NUM_HIDDEN_LAYER)
+    def __init_save_dir(self, k_fold):
+        if op.NUM_HIDDEN_LAYER < 10:
+            _hidden_ = "h_0" + str(op.NUM_HIDDEN_LAYER)
+        else:
+            _hidden_ = "h_" + str(op.NUM_HIDDEN_LAYER)
 
-            _epoch_ = "_ep_" + str(op.EPOCH) + "_"
-            _save_dir = TENSOR_PATH + _hidden_ + _epoch_ + str(k_fold + 1) + "/"
+        _epoch_ = "_ep_" + str(op.EPOCH) + "_"
+        _save_dir = TENSOR_PATH + _hidden_ + _epoch_ + str(k_fold + 1) + "/"
 
-            if os.path.isdir(_save_dir):
-                shutil.rmtree(_save_dir)
-            os.mkdir(_save_dir)
+        if os.path.isdir(_save_dir):
+            shutil.rmtree(_save_dir)
+        os.mkdir(_save_dir)
 
-            return _save_dir
+        return _save_dir
 
-        save_dir = __init_save_dir__()
+    def __load_tensor(self, k_fold):
+        if op.NUM_HIDDEN_LAYER < 10:
+            _hidden_ = "h_0" + str(op.NUM_HIDDEN_LAYER)
+        else:
+            _hidden_ = "h_" + str(op.NUM_HIDDEN_LAYER)
+
+        _epoch_ = "_ep_" + str(op.EPOCH) + "_"
+
+        if op.USE_ID:
+            tensor_load = TENSOR_PATH + op.USE_ID.split('#')[0] + "_"
+        else:
+            tensor_load = TENSOR_PATH
+
+        tensor_load += _hidden_ + _epoch_ + str(k_fold + 1) + "/"
+
+        return tensor_load
+
+    def feed_forward_nn(self, k_fold, x_train, y_train, x_test, y_test, plot):
+
+        save_dir = self.__init_save_dir(k_fold)
         num_input_node = len(x_train[0])
 
         if NUM_HIDDEN_DIMENSION:
@@ -95,7 +113,7 @@ class MyNeuralNetwork:
 
         with tf.Session() as sess:
             merged_summary = tf.summary.merge_all()
-            writer = tf.summary.FileWriter(__init_log_file_name__(k_fold))
+            writer = tf.summary.FileWriter(self.__init_log_file_name(k_fold))
             writer.add_graph(sess.graph)  # Show the graph
 
             sess.run(tf.global_variables_initializer())
@@ -141,3 +159,41 @@ class MyNeuralNetwork:
             print('Accuracy  : %.2f' % (acc * 100))
             print('AUC       : %.2f' % (_auc * 100))
             plot.plot(_logistic_fpr, _logistic_tpr, alpha=0.3, label='ROC fold %d (AUC = %0.2f)' % (k_fold + 1, _auc))
+
+    def load_feed_forward_nn(self, k_fold, x_test, y_test, plot):
+        tensor_load = self.__load_tensor(k_fold)
+
+        sess = tf.Session()
+        saver = tf.train.import_meta_graph(tensor_load + 'model-' + str(op.EPOCH) + '.meta')
+        saver.restore(sess, tf.train.latest_checkpoint(tensor_load))
+
+        print("\n\n\nRead Neural Network -", tensor_load, "\n")
+        graph = tf.get_default_graph()
+        tf_x = graph.get_tensor_by_name(NAME_X + ":0")
+        tf_y = graph.get_tensor_by_name(NAME_Y + ":0")
+        hypothesis = graph.get_tensor_by_name(NAME_HYPO + ":0")
+        predict = graph.get_tensor_by_name(NAME_PREDICT + ":0")
+
+        h, p = sess.run([hypothesis, predict], feed_dict={tf_x: x_test, tf_y: y_test})
+
+        logistic_fpr, logistic_tpr, _ = roc_curve(y_test, h)
+
+        _precision = precision_score(y_test, p)
+        _recall = recall_score(y_test, p)
+        _f1 = f1_score(y_test, p)
+        _accuracy = accuracy_score(y_test, p)
+        _auc = auc(logistic_fpr, logistic_tpr)
+
+        if op.DO_SHOW:
+            print('Precision : %.2f' % (_precision * 100))
+            print('Recall    : %.2f' % (_recall * 100))
+            print('F1-Score  : %.2f' % (_f1 * 100))
+            print('Accuracy  : %.2f' % (_accuracy * 100))
+            print('AUC       : %.2f' % (_auc * 100))
+            plot.plot(logistic_fpr, logistic_tpr, alpha=0.3, label='ROC fold %d (AUC = %0.2f)' % (k_fold+1, _auc))
+
+        self.score["P"] += _precision
+        self.score["R"] += _recall
+        self.score["F1"] += _f1
+        self.score["Acc"] += _accuracy
+        self.score["AUC"] += _auc
