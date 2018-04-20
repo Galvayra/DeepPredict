@@ -17,7 +17,7 @@ class MyNeuralNetwork:
             "AUC": 0.0
         }
 
-    def feed_forward_nn(self, x_train, y_train, x_test, y_test, k_fold):
+    def feed_forward_nn(self, x_train, y_train, x_test, y_test, k_fold, plot):
         def __init_log_file_name__(_k_fold):
             log_name = "./logs/" + op.USE_ID + "log_"
 
@@ -122,7 +122,9 @@ class MyNeuralNetwork:
         _auc = auc(_logistic_fpr, _logistic_tpr)
 
         if _precision == 0 or _recall == 0:
-            print('k-fold : %d, Precision : %.2f, Recall : %.2f' % (k_fold, (_precision * 100), (_recall * 100)))
+            print("\n\n------------\nIt's not working")
+            print('k-fold : %d, Precision : %.2f, Recall : %.2f' % (k_fold + 1, (_precision * 100), (_recall * 100)))
+            print("\n------------")
 
         self.score["P"] += _precision
         self.score["R"] += _recall
