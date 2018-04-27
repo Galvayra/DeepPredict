@@ -105,7 +105,7 @@ class MyNeuralNetwork:
             cost = -tf.reduce_mean(tf_y * tf.log(hypothesis) + (1 - tf_y) * tf.log(1 - hypothesis))
             cost_summ = tf.summary.scalar("cost", cost)
 
-        train = tf.train.GradientDescentOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
+        train = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
 
         # cut off
         predict = tf.cast(hypothesis > 0.5, dtype=tf.float32, name=NAME_PREDICT)
