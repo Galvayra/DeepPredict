@@ -20,7 +20,7 @@ class MyOneHotEncoder:
             print("\nNot using Word2vec")
 
     def encoding(self, data_dict):
-        def __inspect_columns__():
+        def __inspect_columns():
             # show result of columns inspecting
             k_dict = dict()
 
@@ -49,7 +49,7 @@ class MyOneHotEncoder:
                 print(_k, k_dict[_k])
 
         # columns 이 전부 float 형에 어긋나는 행과 데이터를 출력
-        def __inspect_float_column__():
+        def __inspect_float_column():
             for _k in sorted(data_dict.keys()):
                 if _k in blood_count_columns['scalar']:
                     for _i, v in enumerate(data_dict[_k]):
@@ -59,7 +59,7 @@ class MyOneHotEncoder:
                             print(_k, v, "(", _i, ")")
 
         # scalar dictionary 생성을 위해 앞 뒤 예외처리를 해야하는지 각 column 마다 확인해주어야 한다
-        def __set_scalar_dict__(value_list, except_start=0, except_end=0):
+        def __set_scalar_dict(value_list, except_start=0, except_end=0):
             scalar_dict = dict()
             scalar_list = list()
 
@@ -85,7 +85,7 @@ class MyOneHotEncoder:
             return scalar_dict
 
         # 셀의 공백은 type is not str 으로 찾을 수 있으며, 공백(nan)을 하나의 차원으로 볼지에 대한 선택을 우선 해야한다
-        def __set_class_dict__(vector_list):
+        def __set_class_dict(vector_list):
 
             class_dict = dict()
 
@@ -94,7 +94,7 @@ class MyOneHotEncoder:
 
                 # key exception is nan
                 if v != "nan":
-                    if self.__is_zero__(v):
+                    if self.__is_zero(v):
                         v = str(0)
 
                     if v not in class_dict:
@@ -106,8 +106,8 @@ class MyOneHotEncoder:
 
             return class_dict
 
-        def __set_word_dict__(vector_list):
-            def __add_dict__():
+        def __set_word_dict(vector_list):
+            def __add_dict():
                 for word in word_list:
                     if word not in word_dict:
                         word_dict[word] = 1
@@ -121,8 +121,8 @@ class MyOneHotEncoder:
                     word_list = ["0"]
                 else:
                     # pass
-                    word_list = self.__get_word_list_culture__(line)
-                __add_dict__()
+                    word_list = self.__get_word_list_culture(line)
+                __add_dict()
 
             # print(len(word_dict))
             # for dd in word_dict:
@@ -130,8 +130,8 @@ class MyOneHotEncoder:
 
             return word_dict
 
-        def __set_symptom_dict__(vector_list):
-            def __add_dict__():
+        def __set_symptom_dict(vector_list):
+            def __add_dict():
                 for word in word_list:
                     if word not in symptom_dict:
                         symptom_dict[word] = 1
@@ -141,8 +141,8 @@ class MyOneHotEncoder:
             symptom_dict = dict()
 
             for line in vector_list:
-                word_list = self.__get_word_list_symptom__(line)
-                __add_dict__()
+                word_list = self.__get_word_list_symptom(line)
+                __add_dict()
 
             # print(len(symptom_dict))
             # for dd in symptom_dict:
@@ -150,11 +150,11 @@ class MyOneHotEncoder:
 
             return symptom_dict
 
-        # __inspect_columns__()
-        # __inspect_float_column__()
+        # __inspect_columns()
+        # __inspect_float_column()
 
-        def __set_vector_dict__():
-            def __get_scalar_key__(_key):
+        def __set_vector_dict():
+            def __get_scalar_key(_key):
                 _key_list = _key.split('#')
 
                 if len(_key_list) == 2:
@@ -178,30 +178,30 @@ class MyOneHotEncoder:
 
             if columns_key == "scalar":
                 for scalar_key, scalar_columns in columns[columns_key].items():
-                    start, end = __get_scalar_key__(scalar_key)
+                    start, end = __get_scalar_key(scalar_key)
                     if k in columns[columns_key][scalar_key]:
-                        v_list = self.__set_scalar_value_list__(k, data_dict[k])
-                        self.vector_dict[k] = __set_scalar_dict__(v_list, except_start=start, except_end=end)
+                        v_list = self.__set_scalar_value_list(k, data_dict[k])
+                        self.vector_dict[k] = __set_scalar_dict(v_list, except_start=start, except_end=end)
 
             elif columns_key == "class":
                 if k in columns[columns_key]:
-                    self.vector_dict[k] = __set_class_dict__(data_dict[k])
+                    self.vector_dict[k] = __set_class_dict(data_dict[k])
 
             elif columns_key == "symptom":
                 if k in columns[columns_key]:
-                    self.vector_dict[k] = __set_symptom_dict__(data_dict[k])
+                    self.vector_dict[k] = __set_symptom_dict(data_dict[k])
 
             elif columns_key == "word":
                 if k in columns[columns_key]:
-                    self.vector_dict[k] = __set_word_dict__(data_dict[k])
+                    self.vector_dict[k] = __set_word_dict(data_dict[k])
 
         for k in sorted(data_dict.keys()):
             for columns in columns_dict.values():
                 for columns_key in columns:
-                    __set_vector_dict__()
+                    __set_vector_dict()
 
     # str 형데이터를 scalar(float) 로 변환
-    def __set_scalar_value_list__(self, key, value_list):
+    def __set_scalar_value_list(self, _, value_list):
 
         new_value_list = list()
 
@@ -210,7 +210,7 @@ class MyOneHotEncoder:
                 new_value_list.append(float(value))
             except ValueError:
                 # 측정불가와 셀의 값이 0인것
-                if value == "측정불가" or self.__is_zero__(value):
+                if value == "측정불가" or self.__is_zero(value):
                     new_value_list.append(float(0))
                 else:
                     ch = value[0]
@@ -230,8 +230,9 @@ class MyOneHotEncoder:
         return new_value_list
 
     # get word from symptom
-    def __get_word_list_symptom__(self, line):
-        def __parsing__(_w):
+    @staticmethod
+    def __get_word_list_symptom(line):
+        def __parsing(_w):
             _w = _w.strip().lower()
             _w = _w.replace('.', '. ')
             _w = _w.replace('(', ' ')
@@ -267,16 +268,17 @@ class MyOneHotEncoder:
         parsing_data_list = list()
         if len(lines) == 1:
             w = lines[0]
-            parsing_data_list = __parsing__(w)
+            parsing_data_list = __parsing(w)
         else:
             for w in lines:
-                parsing_data_list += __parsing__(w)
+                parsing_data_list += __parsing(w)
 
         return list(set(parsing_data_list))
 
     # get word from symptom
-    def __get_word_list_culture__(self, line):
-        def __parsing__(_w):
+    @staticmethod
+    def __get_word_list_culture(line):
+        def __parsing(_w):
             _w = _w.strip().lower()
             _w = _w.replace('&', '')
             _w = "_".join(_w.split())
@@ -291,15 +293,16 @@ class MyOneHotEncoder:
         parsing_data_list = list()
         if len(lines) == 1:
             w = lines[0]
-            parsing_data_list = __parsing__(w)
+            parsing_data_list = __parsing(w)
         else:
             for w in lines:
-                parsing_data_list += __parsing__(w)
+                parsing_data_list += __parsing(w)
 
         return list(set(parsing_data_list))
 
     # "..", "..." 등 을 확인
-    def __is_zero__(self, string):
+    @staticmethod
+    def __is_zero(string):
         is_zero = True
         for ch in string:
             if ch != '.':
@@ -307,7 +310,7 @@ class MyOneHotEncoder:
         return is_zero
 
     def fit(self, data_dict, data_count):
-        def __init_x_vector_dict__():
+        def __init_x_vector_dict():
             # _x_vector_dict = OrderedDict()
             _x_vector_dict = OrderedDict()
             _x_vector_dict["merge"] = list()
@@ -322,8 +325,8 @@ class MyOneHotEncoder:
 
             return _x_vector_dict
 
-        def __make_vector_use_scalar__():
-            value_list = self.__set_scalar_value_list__(k, v)
+        def __make_vector_use_scalar():
+            value_list = self.__set_scalar_value_list(k, v)
 
             for _i, _value in enumerate(value_list):
                 # type is float
@@ -342,10 +345,10 @@ class MyOneHotEncoder:
                 x_vector_dict["merge"][_i].append(_value)
                 x_vector_dict[columns_key][_i].append(_value)
 
-        def __make_vector_use_class__():
+        def __make_vector_use_class():
             _value = str(value).strip()
 
-            if self.__is_zero__(_value):
+            if self.__is_zero(_value):
                 _value = str(0)
 
             for c in class_list:
@@ -356,8 +359,8 @@ class MyOneHotEncoder:
                     x_vector_dict["merge"][i].append(float(0))
                     x_vector_dict[columns_key][i].append(float(0))
         
-        def __make_vector_use_word__():
-            def __make_one_hot__():
+        def __make_vector_use_word():
+            def __make_one_hot():
                 for _c in class_list:
                     if _c in _word_list:
                         x_vector_dict["merge"][i].append(float(1))
@@ -366,10 +369,10 @@ class MyOneHotEncoder:
                         x_vector_dict["merge"][i].append(float(0))
                         x_vector_dict[columns_key][i].append(float(0))
 
-            def __make_w2v_vector__(x_vector):
+            def __make_w2v_vector(x_vector):
                 _div = len(w2v_vector_list)
                 if _div > 0:
-                    _vector = [0.0 for _v in range(len(w2v_vector_list[0]))]
+                    _vector = [0.0 for _ in range(len(w2v_vector_list[0]))]
 
                     for vector in w2v_vector_list:
                         for _index, _v in enumerate(vector):
@@ -381,7 +384,7 @@ class MyOneHotEncoder:
                     for _v in range(DIMENSION_W2V):
                         x_vector.append(float(0))
 
-            _word_list = self.__get_word_list_symptom__(value)
+            _word_list = self.__get_word_list_symptom(value)
 
             if self.w2v:
                 w2v_vector_list = list()
@@ -392,43 +395,43 @@ class MyOneHotEncoder:
                     except KeyError:
                         pass
 
-                __make_one_hot__()
-                __make_w2v_vector__(x_vector_dict["merge"][i])
-                __make_w2v_vector__(x_vector_dict[columns_key][i])
+                __make_one_hot()
+                __make_w2v_vector(x_vector_dict["merge"][i])
+                __make_w2v_vector(x_vector_dict[columns_key][i])
             else:
-                __make_one_hot__()
+                __make_one_hot()
 
-        def __get_all_columns__(_columns_dict):
+        def __get_all_columns(_columns_dict):
             all_columns = list()
             for _columns in _columns_dict.values():
                 all_columns += _columns
 
             return all_columns
 
-        x_vector_dict = __init_x_vector_dict__()
+        x_vector_dict = __init_x_vector_dict()
 
         for k in sorted(data_dict.keys()):
             v = data_dict[k]
             for columns_key, columns in columns_dict.items():
                 for columns_type_key in columns:
                     if columns_type_key == "scalar":
-                        if k in __get_all_columns__(columns[columns_type_key]):
+                        if k in __get_all_columns(columns[columns_type_key]):
                             encode_dict = self.vector_dict[k]
                             minimum = encode_dict["min"]
                             maximum = encode_dict["max"]
                             division = encode_dict["div"]
-                            __make_vector_use_scalar__()
+                            __make_vector_use_scalar()
                     elif columns_type_key == "class" or columns_type_key == "word":
                         if k in columns[columns_type_key]:
                             encode_dict = self.vector_dict[k]
                             class_list = sorted(encode_dict.keys())
                             for i, value in enumerate(v):
-                                __make_vector_use_class__()
+                                __make_vector_use_class()
                     elif columns_type_key == "symptom":
                         if k in columns[columns_type_key]:
                             encode_dict = self.vector_dict[k]
                             class_list = sorted(encode_dict.keys())
                             for i, value in enumerate(v):
-                                __make_vector_use_word__()
+                                __make_vector_use_word()
 
         return x_vector_dict
