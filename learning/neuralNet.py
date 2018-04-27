@@ -70,11 +70,11 @@ class MyNeuralNetwork:
     def feed_forward_nn(self, k_fold, x_train, y_train, x_test, y_test, plot):
         save_dir = self.__init_save_dir(k_fold)
         num_input_node = len(x_train[0])
-        #
-        # if NUM_HIDDEN_DIMENSION:
-        #     num_hidden_node = NUM_HIDDEN_DIMENSION
-        # else:
-        #     num_hidden_node = len(x_train[0])
+
+        if NUM_HIDDEN_DIMENSION:
+            num_hidden_node = NUM_HIDDEN_DIMENSION
+        else:
+            num_hidden_node = len(x_train[0])
 
         tf_x = tf.placeholder(dtype=tf.float32, shape=[None, num_input_node], name=NAME_X)
         tf_y = tf.placeholder(dtype=tf.float32, shape=[None, 1], name=NAME_Y)
