@@ -87,11 +87,15 @@ class MyNeuralNetwork:
         for i in range(op.NUM_HIDDEN_LAYER):
             num_hidden_node = int(num_input_node / RATIO_HIDDEN)
 
+            # append weight
             tf_weight.append(tf.get_variable("h_weight_" + str(i + 1), dtype=tf.float32,
                                              shape=[num_input_node, num_hidden_node],
                                              initializer=tf.contrib.layers.xavier_initializer()))
-            tf_bias.append(tf.Variable(tf.random_normal([num_hidden_node]), name="h_bias_" + str(i + 1)))
-            tf_layer.append(tf.nn.relu(tf.matmul(tf_layer[i], tf_weight[i]) + tf_bias[i]))
+            # append bias
+            tf_bias.append(tf.Variable(tf.zeros([num_hidden_node]), name="h_bias_" + str(i + 1)))
+
+            # append layer
+            tf_layer.append(tf.nn.relu(tf.add(tf.matmul(tf_layer[i], tf_weight[i]), tf_bias[i])))
 
             num_input_node = int(num_input_node / RATIO_HIDDEN)
 
@@ -99,13 +103,14 @@ class MyNeuralNetwork:
                                          initializer=tf.contrib.layers.xavier_initializer()))
         tf_bias.append(tf.Variable(tf.random_normal([1]), name="o_bias"))
 
-        hypothesis = tf.sigmoid(tf.matmul(tf_layer[-1], tf_weight[-1]) + tf_bias[-1], name=NAME_HYPO)
+        out_layer = tf.add(tf.matmul(tf_layer[-1], tf_weight[-1]), tf_bias[-1])
+        hypothesis = tf.sigmoid(out_layer, name=NAME_HYPO)
 
         with tf.name_scope("cost"):
             cost = -tf.reduce_mean(tf_y * tf.log(hypothesis) + (1 - tf_y) * tf.log(1 - hypothesis))
             cost_summ = tf.summary.scalar("cost", cost)
 
-        train = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
+        train_op = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
 
         # cut off
         predict = tf.cast(hypothesis > 0.5, dtype=tf.float32, name=NAME_PREDICT)
@@ -124,7 +129,8 @@ class MyNeuralNetwork:
 
             # if self.is_closed:
             for step in range(op.EPOCH + 1):
-                summary, cost_val, _ = sess.run([merged_summary, cost, train], feed_dict={tf_x: x_train, tf_y: y_train})
+                summary, cost_val, _ = sess.run([merged_summary, cost, train_op],
+                                                feed_dict={tf_x: x_train, tf_y: y_train})
                 writer.add_summary(summary, global_step=step)
 
                 if op.DO_SHOW and step % (op.EPOCH / 10) == 0:

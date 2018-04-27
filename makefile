@@ -2,11 +2,15 @@ clean:
 	rm -r __pycache__
 	rm -r */__pycache__
 
+clean-saves:
+	rm -r logs/log_*
+	rm -rf modeling/save/h_*
+
 clean-log:
-	rm -r logs/*
+	rm -r logs/log_*
 
 clean-save:
-	rm -rf modeling/save/*
+	rm -rf modeling/save/h_*
 
 clean-result:
 	rm result/*
