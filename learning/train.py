@@ -15,8 +15,8 @@ class MyTrain(MyNeuralNetwork):
         self.vector_list = vector_list
 
     def training(self):
-        def __show_shape__():
-            def __count_mortality__(_y_data_):
+        def __show_shape():
+            def __count_mortality(_y_data_):
                 _count = 0
                 for _i in _y_data_:
                     if _i == [1]:
@@ -31,13 +31,13 @@ class MyTrain(MyNeuralNetwork):
 
             print("\n\n\n\n=====================================\n")
             print("dims - ", len(x_train[0]))
-            print("learning count -", len(y_train), "\t mortality count -", __count_mortality__(y_train))
-            print("test     count -", len(y_test), "\t mortality count -", __count_mortality__(y_test), "\n")
+            print("learning count -", len(y_train), "\t mortality count -", __count_mortality(y_train))
+            print("test     count -", len(y_test), "\t mortality count -", __count_mortality(y_test), "\n")
 
             print(np.shape(x_train_np), np.shape(y_train_np))
             print(np.shape(x_test_np), np.shape(y_test_np))
 
-        def __train_svm__():
+        def __train_svm():
             model = SVC(kernel=SVM_KERNEL, C=1.0, random_state=None, probability=True)
             model.fit(x_train, y_train)
             y_pred = model.predict(x_test)
@@ -66,7 +66,7 @@ class MyTrain(MyNeuralNetwork):
                 print('AUC       : %.2f' % (_auc * 100))
                 plot.plot(_svm_fpr, _svm_tpr, alpha=0.3, label='ROC fold %d (AUC = %0.2f)' % (k_fold+1, _auc))
 
-        def __init_plt__(_title):
+        def __init_plt(_title):
             _fig = plt.figure(figsize=(10, 6))
             _fig.suptitle("ROC CURVE", fontsize=16)
             _plot = plt.subplot2grid((2, 2), (0, 0))
@@ -77,11 +77,11 @@ class MyTrain(MyNeuralNetwork):
 
             return _plot
 
-        def __show_plt__():
+        def __show_plt():
             plot.legend(loc="lower right")
             plt.show()
 
-        def __show_score__(_method):
+        def __show_score(_method):
             print("\n\n============ " + _method + " ============\n")
             print("Total precision - %.2f" % ((self.score["P"] / op.NUM_FOLDS) * 100))
             print("Total recall    -  %.2f" % ((self.score["R"] / op.NUM_FOLDS) * 100))
@@ -95,9 +95,9 @@ class MyTrain(MyNeuralNetwork):
 
         if op.DO_SHOW:
             if op.DO_SVM:
-                plot = __init_plt__("SVM")
+                plot = __init_plt("SVM")
             else:
-                plot = __init_plt__("Feed Forward Neural Network")
+                plot = __init_plt("Feed Forward Neural Network")
 
         for k_fold in range(op.NUM_FOLDS):
             x_train = self.vector_list[k_fold]["x_train"]["merge"]
@@ -106,10 +106,10 @@ class MyTrain(MyNeuralNetwork):
             y_test = self.vector_list[k_fold]["y_test"]
 
             if op.DO_SHOW:
-                __show_shape__()
+                __show_shape()
 
             if op.DO_SVM:
-                __train_svm__()
+                __train_svm()
             else:
                 self.feed_forward_nn(k_fold, x_train, y_train, x_test, y_test, plot)
 
@@ -117,16 +117,16 @@ class MyTrain(MyNeuralNetwork):
         print("\n\n")
 
         if op.DO_SVM:
-            __show_score__("SVM")
+            __show_score("SVM")
         else:
-            __show_score__("Feed Forward NN")
+            __show_score("Feed Forward NN")
 
         if op.DO_SHOW:
-            __show_plt__()
+            __show_plt()
 
     def vector2txt(self, _file_name):
-        def __vector2txt__():
-            def __write_vector__(_w_file):
+        def __vector2txt():
+            def __write_vector(_w_file):
                 for dimension, v in enumerate(x):
                     if v != 0:
                         _w_file.write(str(dimension + 1) + ":" + str(v) + token)
@@ -138,7 +138,7 @@ class MyTrain(MyNeuralNetwork):
                         train_file.write(str(1) + token)
                     else:
                         train_file.write(str(-1) + token)
-                    __write_vector__(train_file)
+                    __write_vector(train_file)
 
             with open("make/" + test_file_name + "_" + str(k_fold + 1) + ".txt", 'w') as test_file:
                 for x, y in zip(x_test, y_test):
@@ -146,7 +146,7 @@ class MyTrain(MyNeuralNetwork):
                         test_file.write(str(1) + token)
                     else:
                         test_file.write(str(-1) + token)
-                    __write_vector__(test_file)
+                    __write_vector(test_file)
 
         token = " "
         train_file_name = "train_" + _file_name
@@ -158,7 +158,7 @@ class MyTrain(MyNeuralNetwork):
             y_train = self.vector_list[k_fold]["y_train"]
             y_test = self.vector_list[k_fold]["y_test"]
 
-            __vector2txt__()
+            __vector2txt()
 
 
 class MyPredict(MyNeuralNetwork):
@@ -166,7 +166,7 @@ class MyPredict(MyNeuralNetwork):
         super().__init__()
         self.vector_list = vector_list
 
-    def __show_score__(self, _method):
+    def __show_score(self, _method):
         print("\n\n============ " + _method + " ============\n")
         print("Total precision - %.2f" % ((self.score["P"] / op.NUM_FOLDS) * 100))
         print("Total recall    -  %.2f" % ((self.score["R"] / op.NUM_FOLDS) * 100))
@@ -176,7 +176,7 @@ class MyPredict(MyNeuralNetwork):
         print("\n\n======================================\n")
 
     def predict(self):
-        def __show_plt__():
+        def __show_plt():
             plot.legend(loc="lower right")
             plt.show()
 
@@ -197,7 +197,7 @@ class MyPredict(MyNeuralNetwork):
 
             self.load_feed_forward_nn(k_fold, x_test, y_test, plot)
 
-        self.__show_score__("Feed Forward NN")
+        self.__show_score("Feed Forward NN")
 
         if op.DO_SHOW:
-            __show_plt__()
+            __show_plt()

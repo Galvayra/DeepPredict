@@ -17,7 +17,8 @@ class MyNeuralNetwork:
             "AUC": 0.0
         }
 
-    def __init_log_file_name(self, k_fold):
+    @staticmethod
+    def __init_log_file_name(k_fold):
         log_name = "./logs/" + op.USE_ID + "log_"
 
         if op.NUM_HIDDEN_LAYER < 10:
@@ -32,7 +33,8 @@ class MyNeuralNetwork:
 
         return log_name
 
-    def __init_save_dir(self, k_fold):
+    @staticmethod
+    def __init_save_dir(k_fold):
         if op.NUM_HIDDEN_LAYER < 10:
             _hidden_ = "h_0" + str(op.NUM_HIDDEN_LAYER)
         else:
@@ -47,7 +49,8 @@ class MyNeuralNetwork:
 
         return _save_dir
 
-    def __load_tensor(self, k_fold):
+    @staticmethod
+    def __load_tensor(k_fold):
         if op.NUM_HIDDEN_LAYER < 10:
             _hidden_ = "h_0" + str(op.NUM_HIDDEN_LAYER)
         else:
