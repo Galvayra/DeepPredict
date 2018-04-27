@@ -68,14 +68,13 @@ class MyNeuralNetwork:
         return tensor_load
 
     def feed_forward_nn(self, k_fold, x_train, y_train, x_test, y_test, plot):
-
         save_dir = self.__init_save_dir(k_fold)
         num_input_node = len(x_train[0])
-
-        if NUM_HIDDEN_DIMENSION:
-            num_hidden_node = NUM_HIDDEN_DIMENSION
-        else:
-            num_hidden_node = len(x_train[0])
+        #
+        # if NUM_HIDDEN_DIMENSION:
+        #     num_hidden_node = NUM_HIDDEN_DIMENSION
+        # else:
+        #     num_hidden_node = len(x_train[0])
 
         tf_x = tf.placeholder(dtype=tf.float32, shape=[None, num_input_node], name=NAME_X)
         tf_y = tf.placeholder(dtype=tf.float32, shape=[None, 1], name=NAME_Y)
@@ -83,7 +82,9 @@ class MyNeuralNetwork:
         tf_weight = list()
         tf_bias = list()
         tf_layer = [tf_x]
+        keep_prob = tf.placeholder(tf.float32)
 
+        # make hidden layers
         for i in range(op.NUM_HIDDEN_LAYER):
             num_hidden_node = int(num_input_node / RATIO_HIDDEN)
 
@@ -92,10 +93,11 @@ class MyNeuralNetwork:
                                              shape=[num_input_node, num_hidden_node],
                                              initializer=tf.contrib.layers.xavier_initializer()))
             # append bias
-            tf_bias.append(tf.Variable(tf.zeros([num_hidden_node]), name="h_bias_" + str(i + 1)))
+            tf_bias.append(tf.Variable(tf.random_normal([num_hidden_node]), name="h_bias_" + str(i + 1)))
 
-            # append layer
-            tf_layer.append(tf.nn.relu(tf.add(tf.matmul(tf_layer[i], tf_weight[i]), tf_bias[i])))
+            # append hidden layer
+            hidden_layer = tf.nn.relu(tf.add(tf.matmul(tf_layer[i], tf_weight[i]), tf_bias[i]))
+            tf_layer.append(tf.nn.dropout(hidden_layer, keep_prob=keep_prob))
 
             num_input_node = int(num_input_node / RATIO_HIDDEN)
 
@@ -103,11 +105,12 @@ class MyNeuralNetwork:
                                          initializer=tf.contrib.layers.xavier_initializer()))
         tf_bias.append(tf.Variable(tf.random_normal([1]), name="o_bias"))
 
-        out_layer = tf.add(tf.matmul(tf_layer[-1], tf_weight[-1]), tf_bias[-1])
-        hypothesis = tf.sigmoid(out_layer, name=NAME_HYPO)
+        hypothesis = tf.matmul(tf_layer[-1], tf_weight[-1]) + tf_bias[-1]
+        hypothesis = tf.sigmoid(hypothesis, name=NAME_HYPO)
 
         with tf.name_scope("cost"):
             cost = -tf.reduce_mean(tf_y * tf.log(hypothesis) + (1 - tf_y) * tf.log(1 - hypothesis))
+            # cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=hypothesis, labels=tf_y))
             cost_summ = tf.summary.scalar("cost", cost)
 
         train_op = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
@@ -130,13 +133,13 @@ class MyNeuralNetwork:
             # if self.is_closed:
             for step in range(op.EPOCH + 1):
                 summary, cost_val, _ = sess.run([merged_summary, cost, train_op],
-                                                feed_dict={tf_x: x_train, tf_y: y_train})
+                                                feed_dict={tf_x: x_train, tf_y: y_train, keep_prob: 0.7})
                 writer.add_summary(summary, global_step=step)
 
                 if op.DO_SHOW and step % (op.EPOCH / 10) == 0:
                     print(str(step).rjust(5), cost_val)
 
-            h, p, acc = sess.run([hypothesis, predict, _accuracy], feed_dict={tf_x: x_test, tf_y: y_test})
+            h, p, acc = sess.run([hypothesis, predict, _accuracy], feed_dict={tf_x: x_test, tf_y: y_test, keep_prob: 1})
 
             saver.save(sess, save_dir + "model", global_step=op.EPOCH)
 
