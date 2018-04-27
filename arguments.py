@@ -153,5 +153,4 @@ def show_options():
         print("\nNot using word2vec")
 
     print("num of hidden layers -", NUM_HIDDEN_LAYER)
-
     print("EPOCH -", EPOCH)
