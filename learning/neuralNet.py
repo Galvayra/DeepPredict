@@ -9,7 +9,7 @@ import shutil
 
 class MyNeuralNetwork:
     def __init__(self):
-        self.score = {
+        self.__score = {
             "P": 0.0,
             "R": 0.0,
             "F1": 0.0,
@@ -17,9 +17,13 @@ class MyNeuralNetwork:
             "AUC": 0.0
         }
 
+    @property
+    def score(self):
+        return self.__score
+
     @staticmethod
     def __init_log_file_name(k_fold):
-        log_name = "./logs/" + op.USE_ID + "log_"
+        log_name = "./logs/" + op.SAVE_DIR_NAME + op.USE_ID + "log_"
 
         if op.NUM_HIDDEN_LAYER < 10:
             log_name += "h_0" + str(op.NUM_HIDDEN_LAYER)
@@ -41,8 +45,12 @@ class MyNeuralNetwork:
             _hidden_ = "h_" + str(op.NUM_HIDDEN_LAYER)
 
         _epoch_ = "_ep_" + str(op.EPOCH) + "_"
-        _save_dir = TENSOR_PATH + _hidden_ + _epoch_ + str(k_fold + 1) + "/"
 
+        _save_dir = TENSOR_PATH + op.SAVE_DIR_NAME
+        if not os.path.isdir(_save_dir):
+            os.mkdir(_save_dir)
+
+        _save_dir += _hidden_ + _epoch_ + str(k_fold + 1) + "/"
         if os.path.isdir(_save_dir):
             shutil.rmtree(_save_dir)
         os.mkdir(_save_dir)
@@ -57,11 +65,12 @@ class MyNeuralNetwork:
             _hidden_ = "h_" + str(op.NUM_HIDDEN_LAYER)
 
         _epoch_ = "_ep_" + str(op.EPOCH) + "_"
+        _save_dir = TENSOR_PATH + op.SAVE_DIR_NAME
 
         if op.USE_ID:
-            tensor_load = TENSOR_PATH + op.USE_ID.split('#')[0] + "_"
+            tensor_load = _save_dir + op.USE_ID.split('#')[0] + "_"
         else:
-            tensor_load = TENSOR_PATH
+            tensor_load = _save_dir
 
         tensor_load += _hidden_ + _epoch_ + str(k_fold + 1) + "/"
 
@@ -156,11 +165,11 @@ class MyNeuralNetwork:
             print('k-fold : %d, Precision : %.2f, Recall : %.2f' % (k_fold + 1, (_precision * 100), (_recall * 100)))
             print("\n------------")
 
-        self.score["P"] += _precision
-        self.score["R"] += _recall
-        self.score["F1"] += _f1
-        self.score["Acc"] += acc
-        self.score["AUC"] += _auc
+        self.__score["P"] += _precision
+        self.__score["R"] += _recall
+        self.__score["F1"] += _f1
+        self.__score["Acc"] += acc
+        self.__score["AUC"] += _auc
 
         if op.DO_SHOW:
             print('\n\n')
@@ -204,8 +213,8 @@ class MyNeuralNetwork:
             print('AUC       : %.2f' % (_auc * 100))
             plot.plot(logistic_fpr, logistic_tpr, alpha=0.3, label='ROC fold %d (AUC = %0.2f)' % (k_fold+1, _auc))
 
-        self.score["P"] += _precision
-        self.score["R"] += _recall
-        self.score["F1"] += _f1
-        self.score["Acc"] += _accuracy
-        self.score["AUC"] += _auc
+        self.__score["P"] += _precision
+        self.__score["R"] += _recall
+        self.__score["F1"] += _f1
+        self.__score["Acc"] += _accuracy
+        self.__score["AUC"] += _auc

@@ -23,6 +23,8 @@ def get_arguments():
                                                 "\nUseAge : python training.py -show 1 (True)\n\n")
     parser.add_argument("-train", "--train", help="set vector file name to train or predict (default is Null)"
                                                   "\nUseAge : python training.py -train 'file_name'\n\n")
+    parser.add_argument("-dir", "--dir", help="set directory name by distinction (default is Null)"
+                                              "\nUseAge : python training.py -dir 'dir_name'\n\n")
     _args = parser.parse_args()
 
     return _args
@@ -128,6 +130,11 @@ if not args.train:
     FILE_VECTOR = str()
 else:
     FILE_VECTOR = args.train
+
+if not args.dir:
+    SAVE_DIR_NAME = str()
+else:
+    SAVE_DIR_NAME = args.dir + "/"
 
 
 def show_options():
