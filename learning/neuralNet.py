@@ -106,7 +106,7 @@ class MyNeuralNetwork:
 
             # append hidden layer
             hidden_layer = tf.nn.relu(tf.add(tf.matmul(tf_layer[i], tf_weight[i]), tf_bias[i]))
-            tf_layer.append(tf.nn.dropout(hidden_layer, keep_prob=keep_prob))
+            tf_layer.append(tf.nn.dropout(hidden_layer, keep_prob=keep_prob, name="dropout_" + str(i + 1)))
 
             num_input_node = int(num_input_node / RATIO_HIDDEN)
 
