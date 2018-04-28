@@ -16,6 +16,9 @@ class MyNeuralNetwork:
             "Acc": 0.0,
             "AUC": 0.0
         }
+        self.tf_x = None
+        self.tf_y = None
+        self.keep_prob = None
 
     @property
     def score(self):
@@ -76,25 +79,22 @@ class MyNeuralNetwork:
 
         return tensor_load
 
-    def feed_forward_nn(self, k_fold, x_train, y_train, x_test, y_test, plot):
-        save_dir = self.__init_save_dir(k_fold)
-        num_input_node = len(x_train[0])
-
+    def __init_multi_layer(self, num_input_node):
         if NUM_HIDDEN_DIMENSION:
             num_hidden_node = NUM_HIDDEN_DIMENSION
         else:
-            num_hidden_node = len(x_train[0])
-
-        tf_x = tf.placeholder(dtype=tf.float32, shape=[None, num_input_node], name=NAME_X)
-        tf_y = tf.placeholder(dtype=tf.float32, shape=[None, 1], name=NAME_Y)
+            num_hidden_node = num_input_node
 
         tf_weight = list()
         tf_bias = list()
-        tf_layer = [tf_x]
-        keep_prob = tf.placeholder(tf.float32)
+        tf_layer = [self.tf_x]
+        if op.DO_SHOW:
+            print("\n\n--- Layer Information ---")
+            print(tf_layer[0].shape)
 
-        # make hidden layers
+        # # make hidden layers
         for i in range(op.NUM_HIDDEN_LAYER):
+            # set number of hidden node
             num_hidden_node = int(num_input_node / RATIO_HIDDEN)
 
             # append weight
@@ -103,30 +103,51 @@ class MyNeuralNetwork:
                                              initializer=tf.contrib.layers.xavier_initializer()))
             # append bias
             tf_bias.append(tf.Variable(tf.random_normal([num_hidden_node]), name="h_bias_" + str(i + 1)))
+            layer = tf.add(tf.matmul(tf_layer[i], tf_weight[i]), tf_bias[i])
+            if op.DO_SHOW:
+                print(layer.shape)
 
             # append hidden layer
-            hidden_layer = tf.nn.relu(tf.add(tf.matmul(tf_layer[i], tf_weight[i]), tf_bias[i]))
-            tf_layer.append(tf.nn.dropout(hidden_layer, keep_prob=keep_prob, name="dropout_" + str(i + 1)))
+            hidden_layer = tf.nn.relu(layer)
+            tf_layer.append(tf.nn.dropout(hidden_layer, keep_prob=self.keep_prob, name="dropout_" + str(i + 1)))
 
+            # set number of node which is next layer
             num_input_node = int(num_input_node / RATIO_HIDDEN)
 
         tf_weight.append(tf.get_variable("o_weight", dtype=tf.float32, shape=[num_hidden_node, 1],
                                          initializer=tf.contrib.layers.xavier_initializer()))
         tf_bias.append(tf.Variable(tf.random_normal([1]), name="o_bias"))
 
-        hypothesis = tf.matmul(tf_layer[-1], tf_weight[-1]) + tf_bias[-1]
-        hypothesis = tf.sigmoid(hypothesis, name=NAME_HYPO)
+        # return X*W + b
+        return tf.add(tf.matmul(tf_layer[-1], tf_weight[-1]), tf_bias[-1])
+
+    def feed_forward_nn(self, k_fold, x_train, y_train, x_test, y_test, plot):
+        save_dir = self.__init_save_dir(k_fold)
+        num_input_node = len(x_train[0])
+
+        self.tf_x = tf.placeholder(dtype=tf.float32, shape=[None, num_input_node], name=NAME_X)
+        self.tf_y = tf.placeholder(dtype=tf.float32, shape=[None, 1], name=NAME_Y)
+        self.keep_prob = tf.placeholder(tf.float32)
+
+        # make hidden layers
+        hypothesis = self.__init_multi_layer(num_input_node=num_input_node)
+
+        if op.DO_SHOW:
+            print(hypothesis.shape)
+            print("\n")
+        hypothesis = tf.sigmoid(hypothesis)
 
         with tf.name_scope("cost"):
-            cost = -tf.reduce_mean(tf_y * tf.log(hypothesis) + (1 - tf_y) * tf.log(1 - hypothesis))
+            cost = -tf.reduce_mean(self.tf_y * tf.log(hypothesis) + (1 - self.tf_y) * tf.log(1 - hypothesis))
             # cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=hypothesis, labels=tf_y))
             cost_summ = tf.summary.scalar("cost", cost)
 
         train_op = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
+        # train_op = tf.train.GradientDescentOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
 
         # cut off
         predict = tf.cast(hypothesis > 0.5, dtype=tf.float32, name=NAME_PREDICT)
-        _accuracy = tf.reduce_mean(tf.cast(tf.equal(predict, tf_y), dtype=tf.float32))
+        _accuracy = tf.reduce_mean(tf.cast(tf.equal(predict, self.tf_y), dtype=tf.float32))
         accuracy_summ = tf.summary.scalar("accuracy", _accuracy)
 
         saver = tf.train.Saver()
@@ -142,13 +163,14 @@ class MyNeuralNetwork:
             # if self.is_closed:
             for step in range(op.EPOCH + 1):
                 summary, cost_val, _ = sess.run([merged_summary, cost, train_op],
-                                                feed_dict={tf_x: x_train, tf_y: y_train, keep_prob: 0.7})
+                                                feed_dict={self.tf_x: x_train, self.tf_y: y_train, self.keep_prob: 0.7})
                 writer.add_summary(summary, global_step=step)
 
                 if op.DO_SHOW and step % (op.EPOCH / 10) == 0:
                     print(str(step).rjust(5), cost_val)
 
-            h, p, acc = sess.run([hypothesis, predict, _accuracy], feed_dict={tf_x: x_test, tf_y: y_test, keep_prob: 1})
+            h, p, acc = sess.run([hypothesis, predict, _accuracy],
+                                 feed_dict={self.tf_x: x_test, self.tf_y: y_test, self.keep_prob: 1})
 
             saver.save(sess, save_dir + "model", global_step=op.EPOCH)
 
