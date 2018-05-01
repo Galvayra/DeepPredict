@@ -135,7 +135,7 @@ class MyNeuralNetwork:
         if op.DO_SHOW:
             print(hypothesis.shape)
             print("\n")
-        hypothesis = tf.sigmoid(hypothesis)
+        hypothesis = tf.sigmoid(hypothesis, name=NAME_HYPO)
 
         with tf.name_scope("cost"):
             cost = -tf.reduce_mean(self.tf_y * tf.log(hypothesis) + (1 - self.tf_y) * tf.log(1 - hypothesis))
