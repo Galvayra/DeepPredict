@@ -180,11 +180,11 @@ class MyNeuralNetwork:
         _recall = recall_score(y_test, p)
         _f1 = f1_score(y_test, p)
         _logistic_fpr, _logistic_tpr, _ = roc_curve(y_test, h)
-        _auc = auc(_logistic_fpr, _logistic_tpr)
+        _auc = auc(_logistic_fpr, _logistic_tpr) * 100
 
         if _precision == 0 or _recall == 0:
             print("\n\n------------\nIt's not working")
-            print('k-fold : %d, Precision : %.2f, Recall : %.2f' % (k_fold + 1, (_precision * 100), (_recall * 100)))
+            print('k-fold : %d, Precision : %.1f, Recall : %.1f' % (k_fold + 1, (_precision * 100), (_recall * 100)))
             print("\n------------")
 
         self.__score["P"] += _precision
@@ -196,12 +196,12 @@ class MyNeuralNetwork:
         if op.DO_SHOW:
             print('\n\n')
             print(k_fold + 1, "fold", 'logistic regression')
-            print('Precision : %.2f' % (_precision * 100))
-            print('Recall    : %.2f' % (_recall * 100))
-            print('F1-Score  : %.2f' % (_f1 * 100))
-            print('Accuracy  : %.2f' % (acc * 100))
-            print('AUC       : %.2f' % (_auc * 100))
-            plot.plot(_logistic_fpr, _logistic_tpr, alpha=0.3, label='ROC fold %d (AUC = %0.2f)' % (k_fold + 1, _auc))
+            print('Precision : %.1f' % (_precision * 100))
+            print('Recall    : %.1f' % (_recall * 100))
+            print('F1-Score  : %.1f' % (_f1 * 100))
+            print('Accuracy  : %.1f' % (acc * 100))
+            print('AUC       : %.1f' % _auc)
+            plot.plot(_logistic_fpr, _logistic_tpr, alpha=0.3, label='ROC %d (AUC = %0.1f)' % (k_fold + 1, _auc))
 
     def load_feed_forward_nn(self, k_fold, x_test, y_test, plot):
         tensor_load = self.__load_tensor(k_fold)
@@ -225,15 +225,15 @@ class MyNeuralNetwork:
         _recall = recall_score(y_test, p)
         _f1 = f1_score(y_test, p)
         _accuracy = accuracy_score(y_test, p)
-        _auc = auc(logistic_fpr, logistic_tpr)
+        _auc = auc(logistic_fpr, logistic_tpr) * 100
 
         if op.DO_SHOW:
-            print('Precision : %.2f' % (_precision * 100))
-            print('Recall    : %.2f' % (_recall * 100))
-            print('F1-Score  : %.2f' % (_f1 * 100))
-            print('Accuracy  : %.2f' % (_accuracy * 100))
-            print('AUC       : %.2f' % (_auc * 100))
-            plot.plot(logistic_fpr, logistic_tpr, alpha=0.3, label='ROC fold %d (AUC = %0.2f)' % (k_fold+1, _auc))
+            print('Precision : %.1f' % (_precision * 100))
+            print('Recall    : %.1f' % (_recall * 100))
+            print('F1-Score  : %.1f' % (_f1 * 100))
+            print('Accuracy  : %.1f' % (_accuracy * 100))
+            print('AUC       : %.1f' % _auc)
+            plot.plot(logistic_fpr, logistic_tpr, alpha=0.3, label='ROC %d (AUC = %0.1f)' % (k_fold+1, _auc))
 
         self.__score["P"] += _precision
         self.__score["R"] += _recall
