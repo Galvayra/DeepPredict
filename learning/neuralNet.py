@@ -3,18 +3,20 @@ import DeepPredict.arguments as op
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import roc_curve, auc
 from .variables import *
+from .plot import MyPlot
 import os
 import shutil
 
 
-class MyNeuralNetwork:
+class MyNeuralNetwork(MyPlot):
     def __init__(self):
+        super().__init__()
         self.__score = {
-            "P": 0.0,
-            "R": 0.0,
-            "F1": 0.0,
-            "Acc": 0.0,
-            "AUC": 0.0
+            "P": list(),
+            "R": list(),
+            "F1": list(),
+            "Acc": list(),
+            "AUC": list()
         }
         self.tf_x = None
         self.tf_y = None
@@ -24,9 +26,29 @@ class MyNeuralNetwork:
     def score(self):
         return self.__score
 
-    def __add_score(self, **kwargs):
+    def add_score(self, **kwargs):
         for k, v in kwargs.items():
-            self.__score[k] += v
+            self.__score[k].append(v)
+
+    def show_score(self, k_fold, fpr, tpr):
+        if op.DO_SHOW:
+            print('\n\n')
+            print(k_fold + 1, "fold")
+            print('Precision : %.1f' % (self.score["P"][-1] * 100))
+            print('Recall    : %.1f' % (self.score["R"][-1] * 100))
+            print('F1-Score  : %.1f' % (self.score["F1"][-1] * 100))
+            print('Accuracy  : %.1f' % (self.score["Acc"][-1] * 100))
+            print('AUC       : %.1f' % self.score["AUC"][-1])
+            self.my_plot.plot(fpr, tpr, alpha=0.3, label='ROC %d (AUC = %0.1f)' % (k_fold+1, self.score["AUC"][-1]))
+
+    def show_total_score(self, _method):
+        print("\n\n============ " + _method + " ============\n")
+        print("Total precision - %.1f" % ((sum(self.score["P"]) / op.NUM_FOLDS) * 100))
+        print("Total recall    - %.1f" % ((sum(self.score["R"]) / op.NUM_FOLDS) * 100))
+        print("Total F1-Score  - %.1f" % ((sum(self.score["F1"]) / op.NUM_FOLDS) * 100))
+        print("Total accuracy  - %.1f" % ((sum(self.score["Acc"]) / op.NUM_FOLDS) * 100))
+        print("Total auc       - %.1f" % (sum(self.score["AUC"]) / op.NUM_FOLDS))
+        print("\n\n======================================\n")
 
     @staticmethod
     def __init_log_file_name(k_fold):
@@ -125,7 +147,7 @@ class MyNeuralNetwork:
         # return X*W + b
         return tf.add(tf.matmul(tf_layer[-1], tf_weight[-1]), tf_bias[-1])
 
-    def feed_forward_nn(self, k_fold, x_train, y_train, x_test, y_test, plot):
+    def feed_forward_nn(self, k_fold, x_train, y_train, x_test, y_test):
         save_dir = self.__init_save_dir(k_fold)
         num_input_node = len(x_train[0])
 
@@ -193,7 +215,7 @@ class MyNeuralNetwork:
             print('k-fold : %d, Precision : %.1f, Recall : %.1f' % (k_fold + 1, (_precision * 100), (_recall * 100)))
             print("\n------------")
 
-        self.__add_score(**{"P": _precision, "R": _recall, "F1": _f1, "Acc": acc, "AUC": _auc})
+        self.add_score(**{"P": _precision, "R": _recall, "F1": _f1, "Acc": acc, "AUC": _auc})
 
         if op.DO_SHOW:
             print('\n\n')
@@ -203,9 +225,10 @@ class MyNeuralNetwork:
             print('F1-Score  : %.1f' % (_f1 * 100))
             print('Accuracy  : %.1f' % (acc * 100))
             print('AUC       : %.1f' % _auc)
-            plot.plot(_logistic_fpr, _logistic_tpr, alpha=0.3, label='ROC %d (AUC = %0.1f)' % (k_fold + 1, _auc))
+            self.my_plot.plot(_logistic_fpr, _logistic_tpr, alpha=0.3,
+                              label='ROC %d (AUC = %0.1f)' % (k_fold + 1, _auc))
 
-    def load_feed_forward_nn(self, k_fold, x_test, y_test, plot):
+    def load_feed_forward_nn(self, k_fold, x_test, y_test):
         tensor_load = self.__load_tensor(k_fold)
 
         sess = tf.Session()
@@ -231,14 +254,5 @@ class MyNeuralNetwork:
         _accuracy = accuracy_score(y_test, p)
         _auc = auc(logistic_fpr, logistic_tpr) / 100
 
-        if op.DO_SHOW:
-            print('\n\n')
-            print(k_fold + 1, "fold")
-            print('Precision : %.1f' % (_precision * 100))
-            print('Recall    : %.1f' % (_recall * 100))
-            print('F1-Score  : %.1f' % (_f1 * 100))
-            print('Accuracy  : %.1f' % (_accuracy * 100))
-            print('AUC       : %.1f' % _auc)
-            plot.plot(logistic_fpr, logistic_tpr, alpha=0.3, label='ROC %d (AUC = %0.1f)' % (k_fold+1, _auc))
-
-        self.__add_score(**{"P": _precision, "R": _recall, "F1": _f1, "Acc": _accuracy, "AUC": _auc})
+        self.add_score(**{"P": _precision, "R": _recall, "F1": _f1, "Acc": _accuracy, "AUC": _auc})
+        self.show_score(k_fold, fpr=logistic_fpr, tpr=logistic_tpr)

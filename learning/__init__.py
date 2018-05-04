@@ -1,1 +1,1 @@
-__all__ = ['train', 'variables', 'neuralNet']
+__all__ = ['train', 'variables', 'neuralNet', 'plot']
