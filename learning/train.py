@@ -38,6 +38,10 @@ class MyTrain(MyNeuralNetwork):
             print(np.shape(x_test_np), np.shape(y_test_np))
 
         def __train_svm():
+            def __add_score(**kwargs):
+                for _k, _v in kwargs.items():
+                    self.score[_k] += _v
+
             model = SVC(kernel=SVM_KERNEL, C=1.0, random_state=None, probability=True)
             model.fit(x_train, y_train)
             y_pred = model.predict(x_test)
@@ -48,13 +52,11 @@ class MyTrain(MyNeuralNetwork):
             _accuracy = accuracy_score(y_test, y_pred)
             _f1 = f1_score(y_test, y_pred)
             _svm_fpr, _svm_tpr, _ = roc_curve(y_test, probas_[:, 1])
-            _auc = auc(_svm_fpr, _svm_tpr) * 100
+            _svm_fpr *= 100
+            _svm_tpr *= 100
 
-            self.score["P"] += _precision
-            self.score["R"] += _recall
-            self.score["F1"] += _f1
-            self.score["Acc"] += _accuracy
-            self.score["AUC"] += _auc
+            _auc = auc(_svm_fpr, _svm_tpr) / 100
+            __add_score(**{"P": _precision, "R": _recall, "F1": _f1, "Acc": _accuracy, "AUC": _auc})
 
             if op.DO_SHOW:
                 print('\n\n')
@@ -72,8 +74,8 @@ class MyTrain(MyNeuralNetwork):
             _plot = plt.subplot2grid((2, 2), (0, 0))
             _plot.set_title(_title)
 
-            _plot.set_ylabel("sensitivity")
-            _plot.set_xlabel("100 - specificity")
+            _plot.set_ylabel("Sensitivity")
+            _plot.set_xlabel("100 - Specificity")
 
             return _plot
 
@@ -84,10 +86,10 @@ class MyTrain(MyNeuralNetwork):
         def __show_score(_method):
             print("\n\n============ " + _method + " ============\n")
             print("Total precision - %.1f" % ((self.score["P"] / op.NUM_FOLDS) * 100))
-            print("Total recall    -  %.1f" % ((self.score["R"] / op.NUM_FOLDS) * 100))
-            print("Total F1-Score  -  %.1f" % ((self.score["F1"] / op.NUM_FOLDS) * 100))
-            print("Total accuracy  -  %.1f" % ((self.score["Acc"] / op.NUM_FOLDS) * 100))
-            print("Total auc       -  %.1f" % ((self.score["AUC"] / op.NUM_FOLDS) * 100))
+            print("Total recall    - %.1f" % ((self.score["R"] / op.NUM_FOLDS) * 100))
+            print("Total F1-Score  - %.1f" % ((self.score["F1"] / op.NUM_FOLDS) * 100))
+            print("Total accuracy  - %.1f" % ((self.score["Acc"] / op.NUM_FOLDS) * 100))
+            print("Total auc       - %.1f" % (self.score["AUC"] / op.NUM_FOLDS))
             print("\n\n======================================\n")
 
         start_time = time.time()
@@ -169,10 +171,10 @@ class MyPredict(MyNeuralNetwork):
     def __show_score(self, _method):
         print("\n\n============ " + _method + " ============\n")
         print("Total precision - %.1f" % ((self.score["P"] / op.NUM_FOLDS) * 100))
-        print("Total recall    -  %.1f" % ((self.score["R"] / op.NUM_FOLDS) * 100))
-        print("Total F1-Score  -  %.1f" % ((self.score["F1"] / op.NUM_FOLDS) * 100))
-        print("Total accuracy  -  %.1f" % ((self.score["Acc"] / op.NUM_FOLDS) * 100))
-        print("Total auc       -  %.1f" % (self.score["AUC"] / op.NUM_FOLDS))
+        print("Total recall    - %.1f" % ((self.score["R"] / op.NUM_FOLDS) * 100))
+        print("Total F1-Score  - %.1f" % ((self.score["F1"] / op.NUM_FOLDS) * 100))
+        print("Total accuracy  - %.1f" % ((self.score["Acc"] / op.NUM_FOLDS) * 100))
+        print("Total auc       - %.1f" % (self.score["AUC"] / op.NUM_FOLDS))
         print("\n\n======================================\n")
 
     def predict(self):
@@ -188,8 +190,8 @@ class MyPredict(MyNeuralNetwork):
             plot = plt.subplot2grid((2, 2), (0, 0))
             plot.set_title("Feed Forward Neural Network")
 
-            plot.set_ylabel("sensitivity")
-            plot.set_xlabel("100 - specificity")
+            plot.set_ylabel("Sensitivity")
+            plot.set_xlabel("100 - Specificity")
 
         for k_fold in range(op.NUM_FOLDS):
             x_test = self.vector_list[k_fold]["x_test"]["merge"]

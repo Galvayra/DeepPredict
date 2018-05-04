@@ -24,6 +24,10 @@ class MyNeuralNetwork:
     def score(self):
         return self.__score
 
+    def __add_score(self, **kwargs):
+        for k, v in kwargs.items():
+            self.__score[k] += v
+
     @staticmethod
     def __init_log_file_name(k_fold):
         log_name = "./logs/" + op.SAVE_DIR_NAME + op.USE_ID + "log_"
@@ -142,8 +146,8 @@ class MyNeuralNetwork:
             # cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=hypothesis, labels=tf_y))
             cost_summ = tf.summary.scalar("cost", cost)
 
-        train_op = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
-        # train_op = tf.train.GradientDescentOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
+        # train_op = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
+        train_op = tf.train.GradientDescentOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
 
         # cut off
         predict = tf.cast(hypothesis > 0.5, dtype=tf.float32, name=NAME_PREDICT)
@@ -180,22 +184,20 @@ class MyNeuralNetwork:
         _recall = recall_score(y_test, p)
         _f1 = f1_score(y_test, p)
         _logistic_fpr, _logistic_tpr, _ = roc_curve(y_test, h)
-        _auc = auc(_logistic_fpr, _logistic_tpr) * 100
+        _logistic_fpr *= 100
+        _logistic_tpr *= 100
+        _auc = auc(_logistic_fpr, _logistic_tpr) / 100
 
         if _precision == 0 or _recall == 0:
             print("\n\n------------\nIt's not working")
             print('k-fold : %d, Precision : %.1f, Recall : %.1f' % (k_fold + 1, (_precision * 100), (_recall * 100)))
             print("\n------------")
 
-        self.__score["P"] += _precision
-        self.__score["R"] += _recall
-        self.__score["F1"] += _f1
-        self.__score["Acc"] += acc
-        self.__score["AUC"] += _auc
+        self.__add_score(**{"P": _precision, "R": _recall, "F1": _f1, "Acc": acc, "AUC": _auc})
 
         if op.DO_SHOW:
             print('\n\n')
-            print(k_fold + 1, "fold", 'logistic regression')
+            print(k_fold + 1, "fold")
             print('Precision : %.1f' % (_precision * 100))
             print('Recall    : %.1f' % (_recall * 100))
             print('F1-Score  : %.1f' % (_f1 * 100))
@@ -220,14 +222,18 @@ class MyNeuralNetwork:
         h, p = sess.run([hypothesis, predict], feed_dict={tf_x: x_test, tf_y: y_test})
 
         logistic_fpr, logistic_tpr, _ = roc_curve(y_test, h)
+        logistic_fpr *= 100
+        logistic_tpr *= 100
 
         _precision = precision_score(y_test, p)
         _recall = recall_score(y_test, p)
         _f1 = f1_score(y_test, p)
         _accuracy = accuracy_score(y_test, p)
-        _auc = auc(logistic_fpr, logistic_tpr) * 100
+        _auc = auc(logistic_fpr, logistic_tpr) / 100
 
         if op.DO_SHOW:
+            print('\n\n')
+            print(k_fold + 1, "fold")
             print('Precision : %.1f' % (_precision * 100))
             print('Recall    : %.1f' % (_recall * 100))
             print('F1-Score  : %.1f' % (_f1 * 100))
@@ -235,8 +241,4 @@ class MyNeuralNetwork:
             print('AUC       : %.1f' % _auc)
             plot.plot(logistic_fpr, logistic_tpr, alpha=0.3, label='ROC %d (AUC = %0.1f)' % (k_fold+1, _auc))
 
-        self.__score["P"] += _precision
-        self.__score["R"] += _recall
-        self.__score["F1"] += _f1
-        self.__score["Acc"] += _accuracy
-        self.__score["AUC"] += _auc
+        self.__add_score(**{"P": _precision, "R": _recall, "F1": _f1, "Acc": _accuracy, "AUC": _auc})
