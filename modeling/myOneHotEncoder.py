@@ -195,7 +195,7 @@ class MyOneHotEncoder:
                 if k in columns[columns_key]:
                     self.vector_dict[k] = __set_word_dict(data_dict[k])
 
-        for k in sorted(data_dict.keys()):
+        for k in data_dict:
             for columns in columns_dict.values():
                 for columns_key in columns:
                     __set_vector_dict()
@@ -314,6 +314,7 @@ class MyOneHotEncoder:
             # _x_vector_dict = OrderedDict()
             _x_vector_dict = OrderedDict()
             _x_vector_dict["merge"] = list()
+
             for _columns_key in columns_dict:
                 _x_vector_dict[_columns_key] = list()
 
@@ -327,6 +328,7 @@ class MyOneHotEncoder:
 
         def __make_vector_use_scalar():
             value_list = self.__set_scalar_value_list(k, v)
+            a = list()
 
             for _i, _value in enumerate(value_list):
                 # type is float
@@ -344,6 +346,8 @@ class MyOneHotEncoder:
 
                 x_vector_dict["merge"][_i].append(_value)
                 x_vector_dict[columns_key][_i].append(_value)
+                a.append(_value)
+
 
         def __make_vector_use_class():
             _value = str(value).strip()
@@ -410,7 +414,7 @@ class MyOneHotEncoder:
 
         x_vector_dict = __init_x_vector_dict()
 
-        for k in sorted(data_dict.keys()):
+        for k in data_dict:
             v = data_dict[k]
             for columns_key, columns in columns_dict.items():
                 for columns_type_key in columns:
