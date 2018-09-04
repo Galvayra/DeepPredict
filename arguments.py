@@ -30,7 +30,8 @@ def get_arguments():
     return _args
 
 
-NUM_FOLDS = 5
+# NUM_FOLDS = 5
+NUM_FOLDS = 1
 RATIO = 10
 
 IS_CLOSED = False

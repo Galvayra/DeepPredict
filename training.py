@@ -43,5 +43,13 @@ if __name__ == '__main__':
         print("\nRead vectors -", file_name)
         op.show_options()
 
-        train = MyTrain(vector_list)
-        train.training()
+        for vector_dict in vector_list:
+            for k in vector_dict:
+                if type(vector_dict[k]) is dict:
+                    for j in vector_dict[k]:
+                        print(j)
+
+        # for k in vector_list:
+        #     print(k)
+        # train = MyTrain(vector_list)
+        # train.training()

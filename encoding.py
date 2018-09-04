@@ -19,5 +19,5 @@ if __name__ == '__main__':
     else:
         myData = MyVector(DataHandler())
     myData.encoding()
-    myData.dump()
+    # myData.dump()
 

@@ -116,12 +116,8 @@ class MyOneHotEncoder:
 
             word_dict = dict()
 
-            for line in vector_list:
-                if type(line) == float:
-                    word_list = ["0"]
-                else:
-                    # pass
-                    word_list = self.__get_word_list_culture(line)
+            for i, line in enumerate(vector_list):
+                word_list = self.__get_word_list_culture(line)
                 __add_dict()
 
             # print(len(word_dict))
@@ -199,6 +195,19 @@ class MyOneHotEncoder:
             for columns in columns_dict.values():
                 for columns_key in columns:
                     __set_vector_dict()
+
+        for k in sorted(self.vector_dict["AD"]):
+            print(k, self.vector_dict["AD"][k])
+        print("\n\n")
+
+        # for k in sorted(self.vector_dict["CF"]):
+        #     print(k, self.vector_dict["CF"][k])
+        # print("\n\n")
+        # for k in sorted(self.vector_dict["CI"]):
+        #     print(k, self.vector_dict["CI"][k])
+        # print("\n\n")
+        # for k in sorted(self.vector_dict["CL"]):
+        #     print(k, self.vector_dict["CL"][k])
 
     # str 형데이터를 scalar(float) 로 변환
     def __set_scalar_value_list(self, _, value_list):
@@ -279,26 +288,35 @@ class MyOneHotEncoder:
     @staticmethod
     def __get_word_list_culture(line):
         def __parsing(_w):
+            if not _w:
+                return ["0"]
+
             _w = _w.strip().lower()
-            _w = _w.replace('&', '')
+            _w = "_" + _w + "_"
             _w = "_".join(_w.split())
             _w = "_".join(_w.split("/"))
             _w = "_".join(_w.split("->"))
-            _w = _w.replace('._', '_')
-            _w = "_" + _w + "_"
+            _w = "_".join(_w.split("-."))
+            _w = _w.replace('&', '_')
 
             return _w[1:-1].split('_')
 
-        lines = line.split(',')
-        parsing_data_list = list()
-        if len(lines) == 1:
-            w = lines[0]
-            parsing_data_list = __parsing(w)
+        if type(line) is float:
+            return ["0"]
+        elif line == "0":
+            return ["0"]
         else:
-            for w in lines:
-                parsing_data_list += __parsing(w)
+            lines = line.split(',')
+            parsing_data_list = list()
 
-        return list(set(parsing_data_list))
+            if len(lines) == 1:
+                w = lines[0]
+                parsing_data_list = __parsing(w)
+            else:
+                for w in lines:
+                    parsing_data_list += __parsing(w)
+
+            return list(set(parsing_data_list))
 
     # "..", "..." 등 을 확인
     @staticmethod
@@ -348,7 +366,6 @@ class MyOneHotEncoder:
                 x_vector_dict[columns_key][_i].append(_value)
                 a.append(_value)
 
-
         def __make_vector_use_class():
             _value = str(value).strip()
 
@@ -362,16 +379,20 @@ class MyOneHotEncoder:
                 else:
                     x_vector_dict["merge"][i].append(float(0))
                     x_vector_dict[columns_key][i].append(float(0))
-        
+
+        def __make_one_hot(_word_list):
+            for _c in class_list:
+                if _c in _word_list:
+                    x_vector_dict["merge"][i].append(float(1))
+                    x_vector_dict[columns_key][i].append(float(1))
+                else:
+                    x_vector_dict["merge"][i].append(float(0))
+                    x_vector_dict[columns_key][i].append(float(0))
+
         def __make_vector_use_word():
-            def __make_one_hot():
-                for _c in class_list:
-                    if _c in _word_list:
-                        x_vector_dict["merge"][i].append(float(1))
-                        x_vector_dict[columns_key][i].append(float(1))
-                    else:
-                        x_vector_dict["merge"][i].append(float(0))
-                        x_vector_dict[columns_key][i].append(float(0))
+            __make_one_hot(self.__get_word_list_culture(value))
+
+        def __make_vector_use_symptom():
 
             def __make_w2v_vector(x_vector):
                 _div = len(w2v_vector_list)
@@ -399,11 +420,11 @@ class MyOneHotEncoder:
                     except KeyError:
                         pass
 
-                __make_one_hot()
+                __make_one_hot(_word_list)
                 __make_w2v_vector(x_vector_dict["merge"][i])
                 __make_w2v_vector(x_vector_dict[columns_key][i])
             else:
-                __make_one_hot()
+                __make_one_hot(_word_list)
 
         def __get_all_columns(_columns_dict):
             all_columns = list()
@@ -425,17 +446,23 @@ class MyOneHotEncoder:
                             maximum = encode_dict["max"]
                             division = encode_dict["div"]
                             __make_vector_use_scalar()
-                    elif columns_type_key == "class" or columns_type_key == "word":
+                    elif columns_type_key == "class":
                         if k in columns[columns_type_key]:
                             encode_dict = self.vector_dict[k]
                             class_list = sorted(encode_dict.keys())
                             for i, value in enumerate(v):
                                 __make_vector_use_class()
-                    elif columns_type_key == "symptom":
+                    elif columns_type_key == "word":
                         if k in columns[columns_type_key]:
                             encode_dict = self.vector_dict[k]
                             class_list = sorted(encode_dict.keys())
                             for i, value in enumerate(v):
                                 __make_vector_use_word()
+                    elif columns_type_key == "symptom":
+                        if k in columns[columns_type_key]:
+                            encode_dict = self.vector_dict[k]
+                            class_list = sorted(encode_dict.keys())
+                            for i, value in enumerate(v):
+                                __make_vector_use_symptom()
 
         return x_vector_dict

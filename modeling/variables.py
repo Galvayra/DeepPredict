@@ -48,7 +48,7 @@ abga_columns = {
 }
 
 culture_columns = {
-    "class": ['CD', 'CE', 'CG', 'CH',  'CJ', 'CK'],
+    # "class": ['CD', 'CE', 'CG', 'CH',  'CJ', 'CK'],
     "word": ['CF', 'CI', 'CL']
 }
 
