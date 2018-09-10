@@ -126,6 +126,26 @@ class MyOneHotEncoder:
 
             return word_dict
 
+        def __set_mal_type_dict(vector_list):
+            def __add_dict():
+                for word in word_list:
+                    if word not in word_dict:
+                        word_dict[word] = 1
+                    else:
+                        word_dict[word] += 1
+
+            word_dict = dict()
+
+            for i, line in enumerate(vector_list):
+                word_list = self.__get_word_list_mal_type(line)
+                __add_dict()
+
+            # print(len(word_dict))
+            # for dd in word_dict:
+            #     print(dd, word_dict[dd])
+
+            return word_dict
+
         def __set_symptom_dict(vector_list):
             def __add_dict():
                 for word in word_list:
@@ -191,14 +211,21 @@ class MyOneHotEncoder:
                 if k in columns[columns_key]:
                     self.vector_dict[k] = __set_word_dict(data_dict[k])
 
+            elif columns_key == "mal_type":
+                if k in columns[columns_key]:
+                    self.vector_dict[k] = __set_mal_type_dict(data_dict[k])
+
         for k in data_dict:
             for columns in columns_dict.values():
                 for columns_key in columns:
                     __set_vector_dict()
 
-        for k in sorted(self.vector_dict["AD"]):
-            print(k, self.vector_dict["AD"][k])
-        print("\n\n")
+
+        # print("\n\n=== AD ===")
+        # for k in sorted(self.vector_dict["AD"]):
+        #     print(k, self.vector_dict["AD"][k])
+        # print("\n\n")
+
 
         # for k in sorted(self.vector_dict["CF"]):
         #     print(k, self.vector_dict["CF"][k])
@@ -284,7 +311,7 @@ class MyOneHotEncoder:
 
         return list(set(parsing_data_list))
 
-    # get word from symptom
+    # get word from culture
     @staticmethod
     def __get_word_list_culture(line):
         def __parsing(_w):
@@ -298,6 +325,38 @@ class MyOneHotEncoder:
             _w = "_".join(_w.split("->"))
             _w = "_".join(_w.split("-."))
             _w = _w.replace('&', '_')
+
+            return _w[1:-1].split('_')
+
+        if type(line) is float:
+            return ["0"]
+        elif line == "0":
+            return ["0"]
+        else:
+            lines = line.split(',')
+            parsing_data_list = list()
+
+            if len(lines) == 1:
+                w = lines[0]
+                parsing_data_list = __parsing(w)
+            else:
+                for w in lines:
+                    parsing_data_list += __parsing(w)
+
+            return list(set(parsing_data_list))
+
+    # get word from culture
+    @staticmethod
+    def __get_word_list_mal_type(line):
+        def __parsing(_w):
+            if not _w:
+                return ["0"]
+
+            _w = _w.strip().lower()
+            _w = "_" + _w + "_"
+            _w = "_".join(_w.split())
+            _w = "_".join(_w.split("/"))
+            _w = _w.replace('_ca._', '_ca_')
 
             return _w[1:-1].split('_')
 
@@ -392,6 +451,9 @@ class MyOneHotEncoder:
         def __make_vector_use_word():
             __make_one_hot(self.__get_word_list_culture(value))
 
+        def __make_vector_use_mal_type():
+            __make_one_hot(self.__get_word_list_mal_type(value))
+
         def __make_vector_use_symptom():
 
             def __make_w2v_vector(x_vector):
@@ -464,5 +526,11 @@ class MyOneHotEncoder:
                             class_list = sorted(encode_dict.keys())
                             for i, value in enumerate(v):
                                 __make_vector_use_symptom()
+                    elif columns_type_key == "mal_type":
+                        if k in columns[columns_type_key]:
+                            encode_dict = self.vector_dict[k]
+                            class_list = sorted(encode_dict.keys())
+                            for i, value in enumerate(v):
+                                __make_vector_use_mal_type()
 
         return x_vector_dict

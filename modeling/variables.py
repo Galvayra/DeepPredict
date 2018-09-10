@@ -23,7 +23,8 @@ initial_info_columns = {
 }
 
 past_history_columns = {
-    "class": ['U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC', 'AD']
+    # "class": ['U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC'],
+    "mal_type": ['AD']
 }
 
 blood_count_columns = {
@@ -48,7 +49,7 @@ abga_columns = {
 }
 
 culture_columns = {
-    # "class": ['CD', 'CE', 'CG', 'CH',  'CJ', 'CK'],
+    "class": ['CD', 'CE', 'CG', 'CH',  'CJ', 'CK'],
     "word": ['CF', 'CI', 'CL']
 }
 
