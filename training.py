@@ -32,7 +32,7 @@ if __name__ == '__main__':
             append_name += "closed_"
 
         file_name = DUMP_FILE + "_" + append_name + csv_name + "_" + str(op.NUM_FOLDS)
-
+        print(file_name)
     try:
         with open(DUMP_PATH + file_name, 'r') as file:
             vector_list = json.load(file)
@@ -49,7 +49,5 @@ if __name__ == '__main__':
                     for j in vector_dict[k]:
                         print(j)
 
-        # for k in vector_list:
-        #     print(k)
-        # train = MyTrain(vector_list)
-        # train.training()
+        train = MyTrain(vector_list)
+        train.training()

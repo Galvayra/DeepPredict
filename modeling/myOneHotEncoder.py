@@ -10,14 +10,27 @@ MIN_SCALING = 0.1
 # initial information & Past history 만을 이용하여 학습
 class MyOneHotEncoder:
     def __init__(self, w2v=True):
-        self.vector_dict = dict()
-        self.w2v = w2v
+        self.__vector = dict()
+        self.__vector_dict = dict()
+        self.__w2v = w2v
         if self.w2v:
             self.model = word2vec.KeyedVectors.load_word2vec_format(DUMP_PATH + LOAD_WORD2VEC, binary=True)
             print("\nUsing word2vec")
             print("\nRead w2v file -", DUMP_PATH + LOAD_WORD2VEC)
         else:
             print("\nNot using Word2vec")
+
+    @property
+    def vector(self):
+        return self.__vector
+
+    @property
+    def vector_dict(self):
+        return self.__vector_dict
+
+    @property
+    def w2v(self):
+        return self.__w2v
 
     def encoding(self, data_dict):
         def __inspect_columns():
@@ -220,12 +233,10 @@ class MyOneHotEncoder:
                 for columns_key in columns:
                     __set_vector_dict()
 
-
         # print("\n\n=== AD ===")
         # for k in sorted(self.vector_dict["AD"]):
         #     print(k, self.vector_dict["AD"][k])
         # print("\n\n")
-
 
         # for k in sorted(self.vector_dict["CF"]):
         #     print(k, self.vector_dict["CF"][k])
@@ -390,7 +401,7 @@ class MyOneHotEncoder:
         def __init_x_vector_dict():
             # _x_vector_dict = OrderedDict()
             _x_vector_dict = OrderedDict()
-            _x_vector_dict["merge"] = list()
+            _x_vector_dict[KEY_NAME_OF_MERGE_VECTOR] = list()
 
             for _columns_key in columns_dict:
                 _x_vector_dict[_columns_key] = list()
@@ -405,7 +416,6 @@ class MyOneHotEncoder:
 
         def __make_vector_use_scalar():
             value_list = self.__set_scalar_value_list(k, v)
-            a = list()
 
             for _i, _value in enumerate(value_list):
                 # type is float
@@ -421,37 +431,44 @@ class MyOneHotEncoder:
                     _value = (_value - minimum + MIN_SCALING)/(division + MIN_SCALING)
                     # _value = (_value - minimum) / division
 
-                x_vector_dict["merge"][_i].append(_value)
+                x_vector_dict[KEY_NAME_OF_MERGE_VECTOR][_i].append(_value)
                 x_vector_dict[columns_key][_i].append(_value)
-                a.append(_value)
+                self.vector[k].append(_value)
 
         def __make_vector_use_class():
             _value = str(value).strip()
+            self.vector[k].append(list())
 
             if self.__is_zero(_value):
                 _value = str(0)
 
             for c in class_list:
                 if c == _value:
-                    x_vector_dict["merge"][i].append(float(1))
+                    x_vector_dict[KEY_NAME_OF_MERGE_VECTOR][i].append(float(1))
                     x_vector_dict[columns_key][i].append(float(1))
+                    self.vector[k][i].append(float(1))
                 else:
-                    x_vector_dict["merge"][i].append(float(0))
+                    x_vector_dict[KEY_NAME_OF_MERGE_VECTOR][i].append(float(0))
                     x_vector_dict[columns_key][i].append(float(0))
+                    self.vector[k][i].append(float(0))
 
         def __make_one_hot(_word_list):
             for _c in class_list:
                 if _c in _word_list:
-                    x_vector_dict["merge"][i].append(float(1))
+                    x_vector_dict[KEY_NAME_OF_MERGE_VECTOR][i].append(float(1))
                     x_vector_dict[columns_key][i].append(float(1))
+                    self.vector[k][i].append(float(1))
                 else:
-                    x_vector_dict["merge"][i].append(float(0))
+                    x_vector_dict[KEY_NAME_OF_MERGE_VECTOR][i].append(float(0))
                     x_vector_dict[columns_key][i].append(float(0))
+                    self.vector[k][i].append(float(0))
 
         def __make_vector_use_word():
+            self.vector[k].append(list())
             __make_one_hot(self.__get_word_list_culture(value))
 
         def __make_vector_use_mal_type():
+            self.vector[k].append(list())
             __make_one_hot(self.__get_word_list_mal_type(value))
 
         def __make_vector_use_symptom():
@@ -471,6 +488,7 @@ class MyOneHotEncoder:
                     for _v in range(DIMENSION_W2V):
                         x_vector.append(float(0))
 
+            self.vector[k].append(list())
             _word_list = self.__get_word_list_symptom(value)
 
             if self.w2v:
@@ -483,7 +501,7 @@ class MyOneHotEncoder:
                         pass
 
                 __make_one_hot(_word_list)
-                __make_w2v_vector(x_vector_dict["merge"][i])
+                __make_w2v_vector(x_vector_dict[KEY_NAME_OF_MERGE_VECTOR][i])
                 __make_w2v_vector(x_vector_dict[columns_key][i])
             else:
                 __make_one_hot(_word_list)
@@ -495,6 +513,7 @@ class MyOneHotEncoder:
 
             return all_columns
 
+        self.__init_vector(data_dict)
         x_vector_dict = __init_x_vector_dict()
 
         for k in data_dict:
@@ -534,3 +553,13 @@ class MyOneHotEncoder:
                                 __make_vector_use_mal_type()
 
         return x_vector_dict
+
+    def __init_vector(self, data_dict):
+        for k in data_dict:
+            self.vector[k] = list()
+
+    def show_vectors(self, x_data_dict, *columns):
+        for k in columns:
+            for data, data_vector in zip(x_data_dict[k], self.vector[k]):
+                print(str(data))
+                print(data_vector)

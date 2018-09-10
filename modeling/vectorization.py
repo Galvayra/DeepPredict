@@ -75,13 +75,16 @@ class MyVector:
             y_train = y_data[subset_size:]
             y_test = y_data[:subset_size]
             x_train = my_encoder.fit(__set_x_data_dict(is_manual=True), len(y_train))
+            # my_encoder.show_vectors(__set_x_data_dict(is_manual=True), "AD")
+
             x_test = my_encoder.fit(__set_x_data_dict(is_manual=True, is_test=True), len(y_test))
+            # my_encoder.show_vectors(__set_x_data_dict(is_manual=True, is_test=True), "AD")
+
             self.vector_list.append(__init_vector_dict())
 
         del self.my_data
 
     def dump(self, do_show=True):
-
         def __counting_mortality(_data):
             count = 0
             for _d in _data:

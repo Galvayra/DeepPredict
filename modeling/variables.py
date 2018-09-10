@@ -3,6 +3,7 @@ from collections import OrderedDict
 DUMP_PATH = "modeling/vectors/"
 DUMP_FILE = "vectors"
 
+KEY_NAME_OF_MERGE_VECTOR = "merge"
 LOAD_WORD2VEC = "GoogleNews-vectors-negative300.bin"
 
 default_info_columns = {
@@ -23,7 +24,7 @@ initial_info_columns = {
 }
 
 past_history_columns = {
-    # "class": ['U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC'],
+    "class": ['U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC'],
     "mal_type": ['AD']
 }
 
