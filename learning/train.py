@@ -79,7 +79,7 @@ class MyTrain(MyNeuralNetwork):
         else:
             self.show_total_score("Feed Forward NN")
 
-        self.show_plot()
+        # self.show_plot()
 
     def vector2txt(self, _file_name):
         def __vector2txt():
