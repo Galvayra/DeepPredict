@@ -559,7 +559,15 @@ class MyOneHotEncoder:
             self.vector[k] = list()
 
     def show_vectors(self, x_data_dict, *columns):
-        for k in columns:
-            for data, data_vector in zip(x_data_dict[k], self.vector[k]):
-                print(str(data))
-                print(data_vector)
+        if not columns:
+            for k in x_data_dict:
+                if k in self.vector:
+                    for data, data_vector in zip(x_data_dict[k], self.vector[k]):
+                        print(str(data))
+                        print(data_vector)
+                    print("\n===========================================\n")
+        else:
+            for k in columns:
+                for data, data_vector in zip(x_data_dict[k], self.vector[k]):
+                    print(str(data))
+                    print(data_vector)

@@ -3,6 +3,9 @@ from .myOneHotEncoder import MyOneHotEncoder
 from .variables import DUMP_FILE, DUMP_PATH
 from collections import OrderedDict
 import json
+import random
+
+SEED = 444
 
 
 class MyVector:
@@ -45,6 +48,14 @@ class MyVector:
         x_data_dict = self.my_data.data_dict
         y_data = self.my_data.y_data
 
+        # shuffle data_dict
+        # random.seed(SEED)
+        # random.shuffle(y_data)
+        #
+        # for header in x_data_dict:
+        #     random.seed(SEED)
+        #     random.shuffle(x_data_dict[header])
+
         # init encoder
         my_encoder = MyOneHotEncoder(w2v=op.USE_W2V)
         my_encoder.encoding(x_data_dict)
@@ -81,7 +92,11 @@ class MyVector:
             # my_encoder.show_vectors(__set_x_data_dict(is_manual=True, is_test=True), "AD")
 
             self.vector_list.append(__init_vector_dict())
+            x_data = __set_x_data_dict(is_manual=True)
+            for i, j in zip(x_data["A"], x_data["F"]):
+                print(i, j)
 
+        exit(-1)
         del self.my_data
 
     def dump(self, do_show=True):

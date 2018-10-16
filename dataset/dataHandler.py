@@ -113,8 +113,8 @@ class DataHandler:
         def __cut_random_data(_erase_index_list):
             r_num = int(CUT_RATIO.split('/')[1])
             cut_count = 0
-            header_key = self.head_dict["DC"]
-            # header_key = self.head_dict["DL"]
+            # header_key = self.head_dict["DC"]
+            header_key = self.head_dict["DL"]
             for i, data in enumerate(self.rows_data[header_key]):
                 if i not in _erase_index_list:
                     if data != "사망":
@@ -152,8 +152,8 @@ class DataHandler:
     def __set_labels(self):
         y_labels = list()
 
-        header_key = self.head_dict["DC"]
-        # header_key = self.head_dict["DL"]
+        # header_key = self.head_dict["DC"]
+        header_key = self.head_dict["DL"]
 
         if self.__is_reverse:
             for i, value in enumerate(self.rows_data[header_key]):
